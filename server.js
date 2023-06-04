@@ -1,5 +1,7 @@
 const express = require('express');
 const app = express();
+const dotenv = require('dotenv').config();
+const { formatAnimals } = require('./formats');
 
 const { Datastore } = require('@google-cloud/datastore');
 
@@ -14,36 +16,59 @@ const { default: jwtDecode } = require('jwt-decode');
 
 const { auth, requiresAuth } = require('express-openid-connect');
 
+const client_id = process.env.CLIENT_ID;
+const client_secret = process.env.CLIENT_SECRET;
+const domain = process.env.DOMAIN;
+
 const config = {
     authRequired: false,
     auth0Logout: true,
     // baseURL: 'https://project7-api-auth.wm.r.appspot.com',
     baseURL: 'http://localhost:8080',
-    clientID: '3XETdOIVMtxWOjRSOOD5XsKnFEy3MhOO',
-    issuerBaseURL: 'https://cs493-spring-2023.us.auth0.com',
-    secret: '9tQjSxuT4_-rRCps-uZvUSlLsYONgYRWCVcvE6qYFqYceOzckAIKhrKq3qpVMQ7M'
+    clientID: client_id,
+    issuerBaseURL: domain,
+    secret: client_secret,
 };
 
 app.use(auth(config)); 
 
 app.get('/', (req, res) => {
-    console.log(req.oidc.idToken); 
-    const userJwt = jwtDecode(req.oidc.idToken); 
-    const userName = decodedJwt['name']; 
+    // unique_id, email, and shelter initialized to null
+    if (req.oidc.isAuthenticated()) {
+        console.log(req.oidc.idToken); 
+        const decodedJwt = jwtDecode(req.oidc.idToken); 
+        const userEmail = decodedJwt['name'];
+        console.log(userEmail);
+        const userId = decodedJwt['sub'];
+        console.log(userId); 
+        addUser(userId, userEmail).then(user => {
+            getUserById(user.id).then(entity => {
+                const returnEntity = {
+                    unique_id: entity[0].unique_id,
+                    email: entity[0].email,
+                    shelter: entity[0].shelter
+                }
+                res.send({user_info: returnEntity, jwt: req.oidc.idToken});
+            })
+        })
+    }
+    else {
+        res.send("Please go to /login to log in first.");
+    }
 })
 
-let checkJwt = jwt({
+app.use(checkJwt = jwt({
     secret: jwksRsa.expressJwtSecret({
         cache: true,
         rateLimit: true,
         jwksRequestsPerMinute: 5,
-        jwksUri: `https://${DOMAIN}/.well-known/jwks.json`
+        jwksUri: `${domain}/.well-known/jwks.json`
     }),
 
     // Validate the audience and the issuer
-    issuer: `https://${DOMAIN}/`,
+    issuer: `${domain}/`,
     algorithms: ['RS256']
-})
+}))
 
 const ANIMAL = "Animal";
 const SHELTER = "Shelter";
@@ -56,10 +81,6 @@ const sheltersRouter = express.Router();
 const adoptersRouter = express.Router();
 const usersRouter = express.Router(); 
 const router = express.Router();
-
-const CLIENT_ID = '3XETdOIVMtxWOjRSOOD5XsKnFEy3MhOO';
-const CLIENT_SECRET = '9tQjSxuT4_-rRCps-uZvUSlLsYONgYRWCVcvE6qYFqYceOzckAIKhrKq3qpVMQ7M';
-const DOMAIN = 'cs493-spring-2023.us.auth0.com';
 
 app.use(bodyParser.json());
 
@@ -83,7 +104,7 @@ function addSelfLink(id, item, req, baseType) {
 
 /* ------------- Begin Animals Model Functions ------------- */
 // Create a new animal (POST) 
-async function addAnimal(req)
+async function addAnimal(req, user)
 {
     const animalKey = datastore.key(ANIMAL); 
     const newAnimal = {
@@ -94,8 +115,9 @@ async function addAnimal(req)
         "gender": req.body.gender,
         "colors": req.body.colors,
         "attributes": req.body.attributes,
-        "adopt_status": req.body.status,
-        "location": null
+        "adopt_status": req.body.adopt_status,
+        "location": null,
+        "user": user
     };
     return datastore.save({
         "key": animalKey,
@@ -123,13 +145,7 @@ async function getAllAnimals(req)
         const animals = results.animals;
         const animalsLen = animals.length; 
         results.total_items = animalsLen; 
-        for (let i = 0; i < animalsLen; i++)
-        {
-            let currAnimal = animals[i]; 
-            // Add the selflink to the animal
-            const newAnimal = addSelfLink(currAnimal.id, currAnimal, req, "animals"); 
-            animals[i] = newAnimal; 
-        }
+        results.animals = formatAnimals(animals, req);
         if (typeof prev !== 'undefined') {
             results.previous = prev;
         }
@@ -164,6 +180,14 @@ async function getAnimalById(animalId)
 // Associate a shelter/adopter with an animal (PUT)
 
 // Delete an animal (DELETE)
+function deleteAnimal(animalId) 
+{
+    const animalKey = datastore.key([
+        ANIMAL,
+        parseInt(animalId, 10)
+    ]);
+    return datastore.delete(animalKey);
+}
 
 // Delete the shelter from the animal (DELETE)
 
@@ -171,15 +195,16 @@ async function getAnimalById(animalId)
 
 /* ------------- Begin Shelters Model Functions ------------- */
 // Add a shelter (POST) 
-async function addShelter(req)
+async function addShelter(req, user)
 {
     const shelterKey = datastore.key(SHELTER); 
     const newShelter = {
         "name": req.body.name,
         "address": req.body.address,
-        "contact": req.body.contact,
-        "animals": req.body.animals,
-        "user": req.body.user
+        "email": req.body.email,
+        "phone": req.body.phone,
+        "animals": [],
+        "user": user
     };
     return datastore.save({
         "key": shelterKey,
@@ -341,15 +366,14 @@ async function getAdopterById(adopterId)
 // Users need to have unique ID displayed
 
 // Add a user to the datastore (POST)
-async function addUser(req)
+async function addUser(user_id, email)
 {
     const userKey = datastore.key(USER); 
     const newUser = {
-        "unique_id": req.body.id,
-        "email": req.body.email,
-        "shelter": req.body.contact,
-        "animals": req.body.animals,
-        "user": req.body.user
+        "unique_id": user_id,
+        "email": email,
+        "shelter": null,
+        // "animal": req.body.animals,
     };
     return datastore.save({
         "key": userKey,
@@ -360,9 +384,27 @@ async function addUser(req)
     })
 }
 
+// Get a specific user in the datastore (GET)
+async function getUserById(userId)
+{
+    const userKey = datastore.key([
+        USER,
+        parseInt(userId, 10)
+    ]);
+    return datastore.get(userKey).then( (entity) => {
+        return entity;
+        // if (entity[0] === undefined || entity[0] === null) {
+        //     // No entity was found, so don't try to add id attribute
+        //     return entity; 
+        // } else {
+        //     return entity.map(fromDatastore); 
+        // }
+    })
+}
+
 // Get all users in the datastore (GET)
-// Potentially: Display user's unique ID, their email, and the shelter ID associated with them
-async function getAllAdopters(req)
+// Potentially: Display user's unique ID, their email, and the shelter ID and name associated with them
+async function getAllUsers(req)
 {
     const query = datastore.createQuery(USER);
     return datastore.runQuery(query)
@@ -380,8 +422,61 @@ async function getAllAdopters(req)
 
 /* ------------- Begin Animals Controller Functions ------------- */
 // POST an animal
+animalsRouter.post('/', checkJwt, (req, res) => {
+    // gets the JWT
+    const jwToken = req.header('authorization');
+    console.log(jwToken);
+    // request must be JSON
+    if (req.get('content-type') !== 'application/json') {
+        res.status(415).send({ 'Error': 'The server only accepts application/json data.' });
+    }
+    // if the request is missing the required parameters, the animal is not created and status 400 is returned
+    else if (req.body.name === undefined || req.body.species === undefined || 
+        req.body.breed === undefined || req.body.age === undefined ||
+        req.body.gender === undefined || req.body.colors === undefined ||
+        req.body.attributes === undefined || req.body.adopt_status === undefined)
+    {
+        res.status(400).json({ 'Error': 'The request object is missing at least one required attribute.' }); 
+    }
+    // If JWT is invalid or missing, status code 401 is returned
+    else if (jwToken === null || jwToken === undefined) {
+        res.status(401).json({ 'Error': 'Invalid jwt.' });
+    }
+    // If JWT is valid the animal is created
+    else 
+        console.log(jwToken);
+        const decodedJwt = jwtDecode(jwToken);
+        const user = decodedJwt['sub']; 
+        addAnimal(req)
+        .then(key => {
+            getAnimalById(key.id)
+            .then (entity => {
+                const newAnimal = addSelfLink(key.id, entity[0], req, "animals");
+                const formattedAnimal = {
+                    id: newAnimal.id,
+                    name: newAnimal.name,
+                    species: newAnimal.species,
+                    breed: newAnimal.breed,
+                    age: newAnimal.age,
+                    gender: newAnimal.gender,
+                    colors: newAnimal.colors,
+                    attributes: newAnimal.attributes,
+                    adopt_status: newAnimal.adopt_status,
+                    location: newAnimal.location
+                }
+                res.status(201).send(formattedAnimal);
+            })
+        })
+    
+})
 
 // GET all animals
+animalsRouter.get('/', function(req, res) {
+    const animals = getAllAnimals(req)
+    .then( animals => {
+        res.status(200).json(animals);
+    })
+})
 
 // GET an animal based on the id
 
@@ -399,6 +494,36 @@ async function getAllAdopters(req)
 
 /* ------------- Begin Shelters Controller Functions ------------- */
 // POST an shelter
+sheltersRouter.post('/', checkJwt, (req, res) => {
+    // gets the JWT 
+    const jwToken = req.header('authorization');
+    // request must be JSON
+    if (req.get('content-type') !== 'application/json') {
+        res.status(415).send({ 'Error': 'The server only accepts application/json data.' }); 
+    }
+    // if request is missing any required parameters, the shelter is not created and status is 400
+    if (req.body.name === undefined || req.body.address === undefined || 
+        req.body.email === undefined || req.body.phone === undefined) 
+    {
+        res.status(400).json({ 'Error': 'The request object is missing at least one required attribute.' });
+    }
+    // if JWT is invalid or missing, status code 401 is returned
+    else if (jwToken === null || jwToken === undefined) {
+        res.status(401).json({ 'Error': 'Invalid jwt.' });
+    }
+    // if JWT is valid, the shelter is created and the user is set to the 'sub' property in the JWT
+    else {
+        const decodedJwt = jwtDecode(jwToken);
+        addShelter(req, decodedJwt['sub'])
+        .then(key => {
+            getShelterById(key.id)
+            .then(shelter => {
+                const newShelter = addSelfLink(key.id, shelter, req, "shelters"); 
+                res.status(201).send(newShelter);
+            }); 
+        }); 
+    };
+})
 
 // GET all shelters
 
@@ -437,6 +562,10 @@ async function getAllAdopters(req)
 
 /* ------------- Begin Users Controller Functions ------------- */
 // POST a user to the datastore
+login.post('/', function(req, res) {
+    const username = req.body.username; 
+
+})
 
 // GET all users
 
@@ -448,8 +577,16 @@ app.use('/animals', animalsRouter);
 app.use('/shelters', sheltersRouter);
 app.use('/adopters', adoptersRouter);
 app.use('/users', usersRouter); 
-app.use('/login', login);
+// app.use('/login', login);
 app.use('/', router);
+
+app.use(function(err, req, res, next) {
+    if (err.name === 'UnauthorizedError') {
+        res.status(401).send({ 'Error': "Missing or Invalid JWT" }); 
+    } else {
+        next();
+    }
+})
 
 // Listen to the App-Engine specific port, or 8080 otherwise
 const PORT = process.env.PORT || 8080;
