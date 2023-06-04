@@ -46,25 +46,116 @@ let checkJwt = jwt({
 })
 
 const ANIMAL = "Animal";
+const SHELTER = "Shelter";
+const ADOPTER = "Adopter";
+const USER = "User"; 
 
 const animalsRouter = express.Router();
 const login = express.Router();
 const sheltersRouter = express.Router();
 const adoptersRouter = express.Router();
 const usersRouter = express.Router(); 
+const router = express.Router();
 
 const CLIENT_ID = '3XETdOIVMtxWOjRSOOD5XsKnFEy3MhOO';
 const CLIENT_SECRET = '9tQjSxuT4_-rRCps-uZvUSlLsYONgYRWCVcvE6qYFqYceOzckAIKhrKq3qpVMQ7M';
 const DOMAIN = 'cs493-spring-2023.us.auth0.com';
 
+app.use(bodyParser.json());
+
+// Add the ID to item from datastore
+function fromDatastore(item) {
+    item.id = item[Datastore.KEY].id;
+    item = {id: item.id, ...item};
+    return item; 
+}
+
+// Adding the self link to the response
+function addSelfLink(id, item, req, baseType) {
+    const selfLink = req.protocol + "://" + req.get("host") + "/" + baseType;
+    const self = selfLink.concat(`/${id}`); 
+    item.self = self;
+    item = {"id": id, ...item, "self": self};
+    return item; 
+}
+
 /* ------------- BEGIN MODEL FUNCTIONS ------------- */
 
 /* ------------- Begin Animals Model Functions ------------- */
-// Add an animal (POST) 
+// Create a new animal (POST) 
+async function addAnimal(req)
+{
+    const animalKey = datastore.key(ANIMAL); 
+    const newAnimal = {
+        "name": req.body.name,
+        "species": req.body.species,
+        "breed": req.body.breed,
+        "age": req.body.age,
+        "gender": req.body.gender,
+        "colors": req.body.colors,
+        "attributes": req.body.attributes,
+        "adopt_status": req.body.status,
+        "location": null
+    };
+    return datastore.save({
+        "key": animalKey,
+        "data": newAnimal 
+    })
+    .then(() => {
+        return animalKey;
+    })
+}
 
 // Get all animals (GET)
+async function getAllAnimals(req)
+{
+    // Limit to 5 results per page
+    var query = datastore.createQuery(ANIMAL).limit(5);
+    const results = {}; 
+    var prev; 
+    if (Object.keys(req.query).includes("cursor")) {
+        prev = req.protocol + "://" + req.get("host") + "/animals" + "?cursor=" + req.query.cursor; 
+        query = query.start(req.query.cursor); 
+    }
+    return datastore.runQuery(query).then( (entities) => {
+        // map the animal to its ID
+        results.animals = entities[0].map(fromDatastore); 
+        const animals = results.animals;
+        const animalsLen = animals.length; 
+        results.total_items = animalsLen; 
+        for (let i = 0; i < animalsLen; i++)
+        {
+            let currAnimal = animals[i]; 
+            // Add the selflink to the animal
+            const newAnimal = addSelfLink(currAnimal.id, currAnimal, req, "animals"); 
+            animals[i] = newAnimal; 
+        }
+        if (typeof prev !== 'undefined') {
+            results.previous = prev;
+        }
+        if (entities[1].moreResults !== datastore.NO_MORE_RESULTS) {
+            results.next = req.protocol + "://" + req.get("host") + "/animals" + "?cursor=" + entities[1].endCursor; 
+        }
+        return results;
+    });
+}
 
 // Get an animal based on ID (GET)
+async function getAnimalById(animalId)
+{
+    const animalKey = datastore.key([
+        ANIMAL,
+        parseInt(animalId, 10)
+    ]);
+    return datastore.get(animalKey).then( (entity) => {
+        if (entity[0] === undefined || entity[0] === null) {
+            // No entity was found, so don't try to add id attribute
+            return entity; 
+        } else {
+            return entity.map(fromDatastore); 
+        }
+    })
+}
 
 // Partial update of one or more of an animal's properties (PATCH)
 
@@ -80,10 +171,75 @@ const DOMAIN = 'cs493-spring-2023.us.auth0.com';
 
 /* ------------- Begin Shelters Model Functions ------------- */
 // Add a shelter (POST) 
+async function addShelter(req)
+{
+    const shelterKey = datastore.key(SHELTER); 
+    const newShelter = {
+        "name": req.body.name,
+        "address": req.body.address,
+        "contact": req.body.contact,
+        "animals": req.body.animals,
+        "user": req.body.user
+    };
+    return datastore.save({
+        "key": shelterKey,
+        "data": newShelter 
+    })
+    .then(() => {
+        return shelterKey;
+    })
+}
 
 // Get all shelters (GET)
+async function getAllShelters(req)
+{
+    // Limit to 5 results per page
+    var query = datastore.createQuery(SHELTER).limit(5);
+    const results = {}; 
+    var prev; 
+    if (Object.keys(req.query).includes("cursor")) {
+        prev = req.protocol + "://" + req.get("host") + "/shelters" + "?cursor=" + req.query.cursor; 
+        query = query.start(req.query.cursor); 
+    }
+    return datastore.runQuery(query).then( (entities) => {
+        // map the shelter to its ID
+        results.shelters = entities[0].map(fromDatastore); 
+        const shelters = results.shelters;
+        const sheltersLen = shelters.length; 
+        results.total_items = sheltersLen; 
+        for (let i = 0; i < sheltersLen; i++)
+        {
+            let currShelter = shelters[i]; 
+            // Add the selflink to the entity
+            const newShelter = addSelfLink(currShelter.id, currShelter, req, "shelters"); 
+            shelters[i] = newShelter; 
+        }
+        if (typeof prev !== 'undefined') {
+            results.previous = prev;
+        }
+        if (entities[1].moreResults !== datastore.NO_MORE_RESULTS) {
+            results.next = req.protocol + "://" + req.get("host") + "/shelters" + "?cursor=" + entities[1].endCursor; 
+        }
+        return results;
+    });
+}
 
 // Get a shelter based on ID (GET)
+async function getShelterById(shelterId)
+{
+    const shelterKey = datastore.key([
+        SHELTER,
+        parseInt(shelterId, 10)
+    ]);
+    return datastore.get(shelterKey).then( (entity) => {
+        if (entity[0] === undefined || entity[0] === null) {
+            // No entity was found, so don't try to add id attribute
+            return entity; 
+        } else {
+            return entity.map(fromDatastore); 
+        }
+    })
+}
 
 // Partial update of one or more of a shelter's properties (PATCH)
 
@@ -99,10 +255,74 @@ const DOMAIN = 'cs493-spring-2023.us.auth0.com';
 
 /* ------------- Begin Adopters Model Functions ------------- */
 // Add an adopter (POST) 
+async function addAdopter(req)
+{
+    const adopterKey = datastore.key(ADOPTER); 
+    const newAdopter = {
+        "name": req.body.name,
+        "address": req.body.address,
+        "contact": req.body.contact,
+        "pet": req.body.pet
+    };
+    return datastore.save({
+        "key": adopterKey,
+        "data": newAdopter 
+    })
+    .then(() => {
+        return adopterKey;
+    })
+}
 
 // Get all adopters (GET)
+async function getAllAdopters(req)
+{
+    // Limit to 5 results per page
+    var query = datastore.createQuery(ADOPTER).limit(5);
+    const results = {}; 
+    var prev; 
+    if (Object.keys(req.query).includes("cursor")) {
+        prev = req.protocol + "://" + req.get("host") + "/adopters" + "?cursor=" + req.query.cursor; 
+        query = query.start(req.query.cursor); 
+    }
+    return datastore.runQuery(query).then( (entities) => {
+        // map the adopter to its ID
+        results.adopters = entities[0].map(fromDatastore); 
+        const adopters = results.adopters;
+        const adoptersLen = adopters.length; 
+        results.total_items = adoptersLen; 
+        for (let i = 0; i < adoptersLen; i++)
+        {
+            let currAdopter = adopters[i]; 
+            // Add the selflink to the entity
+            const newAdopter = addSelfLink(currAdopter.id, currAdopter, req, "adopters"); 
+            adopters[i] = newAdopter; 
+        }
+        if (typeof prev !== 'undefined') {
+            results.previous = prev;
+        }
+        if (entities[1].moreResults !== datastore.NO_MORE_RESULTS) {
+            results.next = req.protocol + "://" + req.get("host") + "/adopters" + "?cursor=" + entities[1].endCursor; 
+        }
+        return results;
+    });
+}
 
 // Get an adopter based on ID (GET)
+async function getAdopterById(adopterId)
+{
+    const adopterKey = datastore.key([
+        ADOPTER,
+        parseInt(adopterId, 10)
+    ]);
+    return datastore.get(adopterKey).then( (entity) => {
+        if (entity[0] === undefined || entity[0] === null) {
+            // No entity was found, so don't try to add id attribute
+            return entity; 
+        } else {
+            return entity.map(fromDatastore); 
+        }
+    })
+}
 
 // Partial update of one or more of an adopter's properties (PATCH)
 
@@ -119,10 +339,37 @@ const DOMAIN = 'cs493-spring-2023.us.auth0.com';
 /* ------------- Begin Users Model Functions ------------- */
 // User needs to get added to Datastore every time they generate a JWT
 // Users need to have unique ID displayed
+
 // Add a user to the datastore (POST)
+async function addUser(req)
+{
+    const userKey = datastore.key(USER); 
+    const newUser = {
+        "unique_id": req.body.id,
+        "email": req.body.email,
+        "shelter": req.body.contact,
+        "animals": req.body.animals,
+        "user": req.body.user
+    };
+    return datastore.save({
+        "key": userKey,
+        "data": newUser 
+    })
+    .then(() => {
+        return userKey;
+    })
+}
 
 // Get all users in the datastore (GET)
 // Potentially: Display user's unique ID, their email, and the shelter ID associated with them
+async function getAllAdopters(req)
+{
+    const query = datastore.createQuery(USER);
+    return datastore.runQuery(query)
+    .then( (entities) => {
+        return entities[0].map(fromDatastore);
+    });
+}
 
 /* ------------- End Users Model Functions ------------- */
 
@@ -195,4 +442,17 @@ const DOMAIN = 'cs493-spring-2023.us.auth0.com';
 
 /* ------------- End Users Controller Functions ------------- */
 
+app.enable('trust proxy'); 
 
+app.use('/animals', animalsRouter);
+app.use('/shelters', sheltersRouter);
+app.use('/adopters', adoptersRouter);
+app.use('/users', usersRouter); 
+app.use('/login', login);
+app.use('/', router);
+
+// Listen to the App-Engine specific port, or 8080 otherwise
+const PORT = process.env.PORT || 8080;
+app.listen(PORT, () => {
+    console.log(`Server listening on port ${PORT}...`);
+})
