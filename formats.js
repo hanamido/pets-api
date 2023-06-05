@@ -1,3 +1,10 @@
+// Add the ID to item from datastore
+function fromDatastore(item) {
+    item.id = item[Datastore.KEY].id;
+    item = {id: item.id, ...item};
+    return item; 
+}
+
 // Adding the self link to the response
 function addSelfLink(id, item, req, baseType) {
     const selfLink = req.protocol + "://" + req.get("host") + "/" + baseType;
@@ -57,4 +64,4 @@ function formatAdopters() {
 
 }
 
-module.exports = {formatAnimals, formatShelters};
+module.exports = { fromDatastore, addSelfLink, formatAnimals, formatShelters, formatUsers };

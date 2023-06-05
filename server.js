@@ -1,7 +1,7 @@
 const express = require('express');
 const app = express();
 const dotenv = require('dotenv').config();
-const { formatAnimals } = require('./formats');
+const { addSelfLink, fromDatastore, formatAnimals, formatShelters, formatUsers } = require('./formats');
 
 const { Datastore } = require('@google-cloud/datastore');
 
@@ -84,22 +84,6 @@ const router = express.Router();
 
 app.use(bodyParser.json());
 
-// Add the ID to item from datastore
-function fromDatastore(item) {
-    item.id = item[Datastore.KEY].id;
-    item = {id: item.id, ...item};
-    return item; 
-}
-
-// Adding the self link to the response
-function addSelfLink(id, item, req, baseType) {
-    const selfLink = req.protocol + "://" + req.get("host") + "/" + baseType;
-    const self = selfLink.concat(`/${id}`); 
-    item.self = self;
-    item = {"id": id, ...item, "self": self};
-    return item; 
-}
-
 /* ------------- BEGIN MODEL FUNCTIONS ------------- */
 
 /* ------------- Begin Animals Model Functions ------------- */
@@ -173,7 +157,33 @@ async function getAnimalById(animalId)
     })
 }
 
-// Partial update of one or more of an animal's properties (PATCH)
+// Edit an animal's properties (PATCH/PUT)
+async function editAnimal(id, name, species, breed, age, gender, colors, attributes, adopt_status, location, user)
+{
+    const animalKey = datastore.key([
+        ANIMAL,
+        parseInt(id, 10)
+    ]);
+    const updatedAnimal = {
+        name: name,
+        species: species, 
+        breed: breed,
+        age: age,
+        gender: gender,
+        colors: colors,
+        attributes: attributes,
+        adopt_status: adopt_status,
+        location: location,
+        user: user
+    };
+    return datastore.save({
+        "key": animalKey,
+        "data": updatedAnimal
+    })
+    .then(() => {
+        return animalKey;
+    });
+}
 
 // Full update of all of an animal's properties (PUT)
 
@@ -201,8 +211,7 @@ async function addShelter(req, user)
     const newShelter = {
         "name": req.body.name,
         "address": req.body.address,
-        "email": req.body.email,
-        "phone": req.body.phone,
+        "contact": req.body.contact,
         "animals": [],
         "user": user
     };
