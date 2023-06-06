@@ -1,7 +1,7 @@
 const express = require('express');
 const app = express();
 const dotenv = require('dotenv').config();
-const { addSelfLink, fromDatastore, formatAnimals, formatShelters, formatUsers } = require('./formats');
+const { addSelfLink, fromDatastore, formatAnimals, formatShelters, formatUsers } = require('./formats').default;
 
 const { Datastore } = require('@google-cloud/datastore');
 
@@ -185,9 +185,52 @@ async function editAnimal(id, name, species, breed, age, gender, colors, attribu
     });
 }
 
-// Full update of all of an animal's properties (PUT)
-
 // Associate a shelter/adopter with an animal (PUT)
+async function assignShelterToAnimal(shelter, animal)
+{
+    // get the animal key from the datastore
+    const animalKey = datastore.key([
+        ANIMAL,
+        parseInt(animal.id, 10)
+    ]); 
+    // shelter to be added to the animal entity
+    let shelterToAdd = {
+        "id": shelter.id,
+        "name": shelter.name,
+        "address": shelter.address, 
+        "contact": shelter.contact
+    };
+    // animal to be added to the shelter entity
+    let animalToAdd = {
+        "id": animal.id,
+        "name": animal.name,
+        "species": animal.species,
+        "adopt_status": animal.adopt_status
+    }
+    // updated animal with the shelter added
+    const updatedAnimal = {
+        "name": animal.name,
+        "species": animal.species,
+        "breed": animal.breed,
+        "age": animal.age,
+        "gender": animal.gender,
+        "colors": animal.colors,
+        "attributes": animal.attributes,
+        "adopt_status": animal.adopt_status,
+        "location": shelterToAdd,  // contains id, name, address, and contact of the shelter
+        "user": animal.user
+    };
+    // add the updated animal (with the specified shelter) to datastore
+    return datastore.save({
+        "key": animalKey,
+        "data": updatedAnimal
+    })
+    // Add the animal to the shelter entity
+    .then(() => {  
+        addAnimalToShelter(animalToAdd, shelter);
+        return animalKey;
+    })
+}
 
 // Delete an animal (DELETE)
 function deleteAnimal(animalId) 
@@ -199,7 +242,33 @@ function deleteAnimal(animalId)
     return datastore.delete(animalKey);
 }
 
-// Delete the shelter from the animal (DELETE)
+// Remove the location from the animal (shelter or adopter) - DELETE
+async function removeLocationFromAnimal(animalId, animalName, animalSpecies, animalBreed, animalAge, animalGender, animalColors, animalAttributes, animalAdopt, animalUser)
+{
+    const animalKey = datastore.key([
+        ANIMAL,
+        parseInt(animalId, 10)
+    ]); 
+    const newAnimal = {
+        "name": animalName,
+        "species": animalSpecies,
+        "breed": animalBreed,
+        "age": animalAge,
+        "gender": animalGender,
+        "colors": animalColors,
+        "attributes": animalAttributes,
+        "adopt_status": animalAdopt,
+        "location": null,
+        "user": animalUser
+    };
+    return datastore.save({
+        "key": animalKey,
+        "data": newAnimal
+    })
+    .then(() => {
+        return animalKey;
+    })
+}
 
 /* ------------- End Animals Model Functions ------------- */
 
@@ -275,15 +344,78 @@ async function getShelterById(shelterId)
     })
 }
 
-// Partial update of one or more of a shelter's properties (PATCH)
-
-// Full update of all of a shelter's properties (PUT)
+// Edit a shelter's properties (PATCH/PUT)
 
 // Add an animal to a shelter (PUT)
+async function addAnimalToShelter(animalToAdd, shelter) 
+{
+    const shelterKey = datastore.key([
+        SHELTER,
+        parseInt(shelter.id, 10)
+    ]); 
+    // add the animal to the animals array property of shelter
+    shelter.animals.push(animalToAdd);
+    const newShelter = {
+        "name": shelter.name,
+        "address": shelter.address,
+        "contact": shelter.address,
+        "animals": shelter.animals,
+        "user": shelter.user
+    };
+    return datastore.save({
+        "key": shelterKey,
+        "data": newShelter
+    })
+    .then( () => {
+        return shelterKey;
+    });
+}
 
 // Delete a shelter (DELETE)
+async function deleteShelter(shelterId)
+{
+    const shelterKey = datastore.key([
+        SHELTER,
+        parseInt(shelterId, 10)
+    ]);
+    return datastore.delete(shelterKey); 
+}
 
-// Delete the association between the shelter and the animal (DELETE)
+// Remove the association between the shelter and the animal (DELETE)
+async function removeAnimalFromShelter(shelterId, animalId, shelterName, shelterAddress, shelterContact, shelterAnimals, shelterUser)
+{
+    const shelterKey = datastore.key([
+        SHELTER,
+        parseInt(shelterId, 10)
+    ]); 
+    let unloadedArray = [];
+    const shelterAnimalsLen = shelterAnimals.length; 
+    // Add all animals that are not the specified animalId to the new unloadedArray
+    for (let i = 0; i < shelterAnimalsLen; i++)
+    {
+        if (shelterAnimals[i].id !== animalId) {
+            unloadedArray.push(shelterAnimals[i]);
+        }
+    }; 
+    // If there is only one animal in the shelter, then clear that array
+    if (unloadedArray.length === 0) {
+        unloadedArray = [];
+    }; 
+    const newShelter = {
+        "name": shelterName,
+        "address": shelterAddress,
+        "contact": shelterContact,
+        "animals": unloadedArray,
+        "user": shelterUser
+    };
+    return datastore.save({
+        "key": shelterKey,
+        "data": newShelter
+    })
+    .then(() => {
+        return shelterKey; 
+    });
+}
 
 /* ------------- End Shelters Model Functions ------------- */
 
@@ -358,13 +490,19 @@ async function getAdopterById(adopterId)
     })
 }
 
-// Partial update of one or more of an adopter's properties (PATCH)
-
-// Full update of all of an adopter's properties (PUT)
+// Update an adopter's properties (PATCH)
 
 // Put an animal in the adopter's care (PUT)
 
 // Delete an adopter (DELETE)
+async function deleteAdopter(adopterId)
+{
+    const adopterKey = datastore.key([
+        ADOPTER,
+        parseInt(adopterId, 10)
+    ]);
+    return datastore.delete(adopterKey);
+}
 
 // Delete the association between the adopter and the animal (DELETE)
 
@@ -401,13 +539,12 @@ async function getUserById(userId)
         parseInt(userId, 10)
     ]);
     return datastore.get(userKey).then( (entity) => {
-        return entity;
-        // if (entity[0] === undefined || entity[0] === null) {
-        //     // No entity was found, so don't try to add id attribute
-        //     return entity; 
-        // } else {
-        //     return entity.map(fromDatastore); 
-        // }
+        if (entity[0] === undefined || entity[0] === null) {
+            // No entity was found, so don't try to add id attribute
+            return entity; 
+        } else {
+            return entity.map(fromDatastore); 
+        }
     })
 }
 
