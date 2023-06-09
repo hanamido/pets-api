@@ -1,0 +1,7 @@
+const { Datastore } = require('@google-cloud/datastore');
+const datastore = new Datastore();
+
+module.exports = {
+    Datastore: Datastore,
+    datastore: datastore
+}

@@ -1,7 +1,42 @@
 const express = require('express');
 const app = express();
 const dotenv = require('dotenv').config();
-const { addSelfLink, fromDatastore, formatAnimals, formatShelters, formatUsers } = require('./formats').default;
+// const addSelfLink = require('./formats');
+
+// module exports
+const { addSelfLink, fromDatastore, formatAnimals, formatShelters, formatUsers } = require('./formats');
+const {
+    addAnimal: addAnimal,
+    getAllAnimals: getAllAnimals,
+    getAnimalById: getAnimalById,
+    editAnimal: editAnimal,
+    assignShelterToAnimal: assignShelterToAnimal,
+    assignAdopterToAnimal: assignAdopterToAnimal,
+    deleteAnimal: deleteAnimal,
+    removeLocationFromAnimal: removeLocationFromAnimal,
+    checkIfAnimalInShelter: checkIfAnimalInShelter,
+    checkIfAnimalWithAdopter: checkIfAnimalWithAdopter
+} = require('./models/animals');
+const {
+    addShelter: addShelter,
+    getAllShelters: getAllShelters,
+    getShelterById: getShelterById,
+    editShelter: editShelter,
+    addAnimalToShelter: addAnimalToShelter,
+    deleteShelter: deleteShelter,
+    removeAnimalFromShelter: removeAnimalFromShelter
+} = require('./models/shelters');
+
+const {
+    addAdopter: addAdopter,
+    getAllAdopters: getAllAdopters,
+    getAdopterById: getAdopterById,
+    editAdopter: editAdopter,
+    assignAnimalToAdopter: assignAnimalToAdopter,
+    addAnimalToAdopter: addAnimalToAdopter, 
+    deleteAdopter: deleteAdopter,
+    removeAnimalFromAdopter: removeAnimalFromAdopter
+} = require('./models/adopters');
 
 const { Datastore } = require('@google-cloud/datastore');
 
@@ -15,6 +50,7 @@ const jwksRsa = require('jwks-rsa');
 const { default: jwtDecode } = require('jwt-decode');
 
 const { auth, requiresAuth } = require('express-openid-connect');
+const { parse } = require('dotenv');
 
 const client_id = process.env.CLIENT_ID;
 const client_secret = process.env.CLIENT_SECRET;
@@ -33,31 +69,68 @@ const config = {
 app.use(auth(config)); 
 
 app.get('/', (req, res) => {
-    // unique_id, email, and shelter initialized to null
     if (req.oidc.isAuthenticated()) {
-        console.log(req.oidc.idToken); 
         const decodedJwt = jwtDecode(req.oidc.idToken); 
         const userEmail = decodedJwt['name'];
         console.log(userEmail);
         const userId = decodedJwt['sub'];
         console.log(userId); 
-        addUser(userId, userEmail).then(user => {
-            getUserById(user.id).then(entity => {
-                const returnEntity = {
-                    unique_id: entity[0].unique_id,
-                    email: entity[0].email,
-                    shelter: entity[0].shelter
-                }
-                res.send({user_info: returnEntity, jwt: req.oidc.idToken});
-            })
-        })
+        // checks if the user is already in datastore
+        // if so, do not add that user and just display their JWT
+        // const query = datastore.createQuery(USER).filter('user_id', '=', userId);
+        // return datastore.runQuery(query).then( data => {
+        //     // if the user is found (not an empty array), then return that user's data
+        //     console.log(data, data[0]);
+        //     if (data[0].length !== 0) {
+        //         console.log('User is already in datastore.');
+        //         const user = data[0][0];
+        //         const returnEntity = {
+        //             user_id: user.user_id,
+        //             email: user.email,
+        //             shelter: user.shelter,
+        //             animals: user.animals
+        //         }
+        //         res.send({ user_info: returnEntity, jwt: req.oidc.idToken });
+        //     }
+        //     // else we add the user and return the entity to be displayed
+        //     else {
+        //         console.log('User is NOT in datastore yet.');
+        //         addUser(userId, userEmail).then(user => {
+        //             getUserById(user.id).then(entity => {
+        //                 const returnEntity = {
+        //                     user_id: entity[0].user_id,
+        //                     email: entity[0].email,
+        //                     shelter: entity[0].shelter,
+        //                     animals: entity[0].animals
+        //                 }
+        //                 res.send({user_info: returnEntity, jwt: req.oidc.idToken});
+        //             })
+        //         })
+        //     }
+        // })
+        checkIfUserInDatastore(userId).then(data => {
+            if (data != null) {
+                console.log(data);
+                const returnEntity = formatUsers(data, req); 
+                res.send({ user_info: returnEntity, jwt: req.oidc.idToken });
+            }
+            else {
+                addUser(userId, userEmail).then(user => {
+                    getUserById(user.id).then(entity => {
+                        console.log(entity[0]);
+                        const returnEntity = formatUsers(entity, req)
+                        res.send({user_info: returnEntity, jwt: req.oidc.idToken});
+                    })
+                })
+            }
+        }); 
     }
     else {
         res.send("Please go to /login to log in first.");
     }
 })
 
-app.use(checkJwt = jwt({
+let checkJwt = jwt({
     secret: jwksRsa.expressJwtSecret({
         cache: true,
         rateLimit: true,
@@ -68,7 +141,20 @@ app.use(checkJwt = jwt({
     // Validate the audience and the issuer
     issuer: `${domain}/`,
     algorithms: ['RS256']
-}))
+})
+
+// app.use(checkJwt = jwt({
+//     secret: jwksRsa.expressJwtSecret({
+//         cache: true,
+//         rateLimit: true,
+//         jwksRequestsPerMinute: 5,
+//         jwksUri: `${domain}/.well-known/jwks.json`
+//     }),
+
+//     // Validate the audience and the issuer
+//     issuer: `${domain}/`,
+//     algorithms: ['RS256']
+// }))
 
 const ANIMAL = "Animal";
 const SHELTER = "Shelter";
@@ -85,339 +171,16 @@ const router = express.Router();
 app.use(bodyParser.json());
 
 /* ------------- BEGIN MODEL FUNCTIONS ------------- */
-
-/* ------------- Begin Animals Model Functions ------------- */
-// Create a new animal (POST) 
-async function addAnimal(req, user)
-{
-    const animalKey = datastore.key(ANIMAL); 
-    const newAnimal = {
-        "name": req.body.name,
-        "species": req.body.species,
-        "breed": req.body.breed,
-        "age": req.body.age,
-        "gender": req.body.gender,
-        "colors": req.body.colors,
-        "attributes": req.body.attributes,
-        "adopt_status": req.body.adopt_status,
-        "location": null,
-        "user": user
-    };
-    return datastore.save({
-        "key": animalKey,
-        "data": newAnimal 
-    })
-    .then(() => {
-        return animalKey;
-    })
-}
-
-// Get all animals (GET)
-async function getAllAnimals(req)
-{
-    // Limit to 5 results per page
-    var query = datastore.createQuery(ANIMAL).limit(5);
-    const results = {}; 
-    var prev; 
-    if (Object.keys(req.query).includes("cursor")) {
-        prev = req.protocol + "://" + req.get("host") + "/animals" + "?cursor=" + req.query.cursor; 
-        query = query.start(req.query.cursor); 
-    }
-    return datastore.runQuery(query).then( (entities) => {
-        // map the animal to its ID
-        results.animals = entities[0].map(fromDatastore); 
-        const animals = results.animals;
-        const animalsLen = animals.length; 
-        results.total_items = animalsLen; 
-        results.animals = formatAnimals(animals, req);
-        if (typeof prev !== 'undefined') {
-            results.previous = prev;
+function checkJwtForUnprotected() {
+    return [
+        checkJwt,
+        function(err, req, res, next) {
+            if (err) {
+                next();
+            } 
         }
-        if (entities[1].moreResults !== datastore.NO_MORE_RESULTS) {
-            results.next = req.protocol + "://" + req.get("host") + "/animals" + "?cursor=" + entities[1].endCursor; 
-        }
-        return results;
-    });
+    ]
 }
-
-// Get an animal based on ID (GET)
-async function getAnimalById(animalId)
-{
-    const animalKey = datastore.key([
-        ANIMAL,
-        parseInt(animalId, 10)
-    ]);
-    return datastore.get(animalKey).then( (entity) => {
-        if (entity[0] === undefined || entity[0] === null) {
-            // No entity was found, so don't try to add id attribute
-            return entity; 
-        } else {
-            return entity.map(fromDatastore); 
-        }
-    })
-}
-
-// Edit an animal's properties (PATCH/PUT)
-async function editAnimal(id, name, species, breed, age, gender, colors, attributes, adopt_status, location, user)
-{
-    const animalKey = datastore.key([
-        ANIMAL,
-        parseInt(id, 10)
-    ]);
-    const updatedAnimal = {
-        name: name,
-        species: species, 
-        breed: breed,
-        age: age,
-        gender: gender,
-        colors: colors,
-        attributes: attributes,
-        adopt_status: adopt_status,
-        location: location,
-        user: user
-    };
-    return datastore.save({
-        "key": animalKey,
-        "data": updatedAnimal
-    })
-    .then(() => {
-        return animalKey;
-    });
-}
-
-// Associate a shelter/adopter with an animal (PUT)
-async function assignShelterToAnimal(shelter, animal)
-{
-    // get the animal key from the datastore
-    const animalKey = datastore.key([
-        ANIMAL,
-        parseInt(animal.id, 10)
-    ]); 
-    // shelter to be added to the animal entity
-    let shelterToAdd = {
-        "id": shelter.id,
-        "name": shelter.name,
-        "address": shelter.address, 
-        "contact": shelter.contact
-    };
-    // animal to be added to the shelter entity
-    let animalToAdd = {
-        "id": animal.id,
-        "name": animal.name,
-        "species": animal.species,
-        "adopt_status": animal.adopt_status
-    }
-    // updated animal with the shelter added
-    const updatedAnimal = {
-        "name": animal.name,
-        "species": animal.species,
-        "breed": animal.breed,
-        "age": animal.age,
-        "gender": animal.gender,
-        "colors": animal.colors,
-        "attributes": animal.attributes,
-        "adopt_status": animal.adopt_status,
-        "location": shelterToAdd,  // contains id, name, address, and contact of the shelter
-        "user": animal.user
-    };
-    // add the updated animal (with the specified shelter) to datastore
-    return datastore.save({
-        "key": animalKey,
-        "data": updatedAnimal
-    })
-    // Add the animal to the shelter entity
-    .then(() => {  
-        addAnimalToShelter(animalToAdd, shelter);
-        return animalKey;
-    })
-}
-
-// Delete an animal (DELETE)
-function deleteAnimal(animalId) 
-{
-    const animalKey = datastore.key([
-        ANIMAL,
-        parseInt(animalId, 10)
-    ]);
-    return datastore.delete(animalKey);
-}
-
-// Remove the location from the animal (shelter or adopter) - DELETE
-async function removeLocationFromAnimal(animalId, animalName, animalSpecies, animalBreed, animalAge, animalGender, animalColors, animalAttributes, animalAdopt, animalUser)
-{
-    const animalKey = datastore.key([
-        ANIMAL,
-        parseInt(animalId, 10)
-    ]); 
-    const newAnimal = {
-        "name": animalName,
-        "species": animalSpecies,
-        "breed": animalBreed,
-        "age": animalAge,
-        "gender": animalGender,
-        "colors": animalColors,
-        "attributes": animalAttributes,
-        "adopt_status": animalAdopt,
-        "location": null,
-        "user": animalUser
-    };
-    return datastore.save({
-        "key": animalKey,
-        "data": newAnimal
-    })
-    .then(() => {
-        return animalKey;
-    })
-}
-
-/* ------------- End Animals Model Functions ------------- */
-
-/* ------------- Begin Shelters Model Functions ------------- */
-// Add a shelter (POST) 
-async function addShelter(req, user)
-{
-    const shelterKey = datastore.key(SHELTER); 
-    const newShelter = {
-        "name": req.body.name,
-        "address": req.body.address,
-        "contact": req.body.contact,
-        "animals": [],
-        "user": user
-    };
-    return datastore.save({
-        "key": shelterKey,
-        "data": newShelter 
-    })
-    .then(() => {
-        return shelterKey;
-    })
-}
-
-// Get all shelters (GET)
-async function getAllShelters(req)
-{
-    // Limit to 5 results per page
-    var query = datastore.createQuery(SHELTER).limit(5);
-    const results = {}; 
-    var prev; 
-    if (Object.keys(req.query).includes("cursor")) {
-        prev = req.protocol + "://" + req.get("host") + "/shelters" + "?cursor=" + req.query.cursor; 
-        query = query.start(req.query.cursor); 
-    }
-    return datastore.runQuery(query).then( (entities) => {
-        // map the shelter to its ID
-        results.shelters = entities[0].map(fromDatastore); 
-        const shelters = results.shelters;
-        const sheltersLen = shelters.length; 
-        results.total_items = sheltersLen; 
-        for (let i = 0; i < sheltersLen; i++)
-        {
-            let currShelter = shelters[i]; 
-            // Add the selflink to the entity
-            const newShelter = addSelfLink(currShelter.id, currShelter, req, "shelters"); 
-            shelters[i] = newShelter; 
-        }
-        if (typeof prev !== 'undefined') {
-            results.previous = prev;
-        }
-        if (entities[1].moreResults !== datastore.NO_MORE_RESULTS) {
-            results.next = req.protocol + "://" + req.get("host") + "/shelters" + "?cursor=" + entities[1].endCursor; 
-        }
-        return results;
-    });
-}
-
-// Get a shelter based on ID (GET)
-async function getShelterById(shelterId)
-{
-    const shelterKey = datastore.key([
-        SHELTER,
-        parseInt(shelterId, 10)
-    ]);
-    return datastore.get(shelterKey).then( (entity) => {
-        if (entity[0] === undefined || entity[0] === null) {
-            // No entity was found, so don't try to add id attribute
-            return entity; 
-        } else {
-            return entity.map(fromDatastore); 
-        }
-    })
-}
-
-// Edit a shelter's properties (PATCH/PUT)
-
-// Add an animal to a shelter (PUT)
-async function addAnimalToShelter(animalToAdd, shelter) 
-{
-    const shelterKey = datastore.key([
-        SHELTER,
-        parseInt(shelter.id, 10)
-    ]); 
-    // add the animal to the animals array property of shelter
-    shelter.animals.push(animalToAdd);
-    const newShelter = {
-        "name": shelter.name,
-        "address": shelter.address,
-        "contact": shelter.address,
-        "animals": shelter.animals,
-        "user": shelter.user
-    };
-    return datastore.save({
-        "key": shelterKey,
-        "data": newShelter
-    })
-    .then( () => {
-        return shelterKey;
-    });
-}
-
-// Delete a shelter (DELETE)
-async function deleteShelter(shelterId)
-{
-    const shelterKey = datastore.key([
-        SHELTER,
-        parseInt(shelterId, 10)
-    ]);
-    return datastore.delete(shelterKey); 
-}
-
-// Remove the association between the shelter and the animal (DELETE)
-async function removeAnimalFromShelter(shelterId, animalId, shelterName, shelterAddress, shelterContact, shelterAnimals, shelterUser)
-{
-    const shelterKey = datastore.key([
-        SHELTER,
-        parseInt(shelterId, 10)
-    ]); 
-    let unloadedArray = [];
-    const shelterAnimalsLen = shelterAnimals.length; 
-    // Add all animals that are not the specified animalId to the new unloadedArray
-    for (let i = 0; i < shelterAnimalsLen; i++)
-    {
-        if (shelterAnimals[i].id !== animalId) {
-            unloadedArray.push(shelterAnimals[i]);
-        }
-    }; 
-    // If there is only one animal in the shelter, then clear that array
-    if (unloadedArray.length === 0) {
-        unloadedArray = [];
-    }; 
-    const newShelter = {
-        "name": shelterName,
-        "address": shelterAddress,
-        "contact": shelterContact,
-        "animals": unloadedArray,
-        "user": shelterUser
-    };
-    return datastore.save({
-        "key": shelterKey,
-        "data": newShelter
-    })
-    .then(() => {
-        return shelterKey; 
-    });
-}
-
-/* ------------- End Shelters Model Functions ------------- */
 
 /* ------------- Begin Adopters Model Functions ------------- */
 // Add an adopter (POST) 
@@ -428,7 +191,7 @@ async function addAdopter(req)
         "name": req.body.name,
         "address": req.body.address,
         "contact": req.body.contact,
-        "pet": req.body.pet
+        "pets": req.body.pets
     };
     return datastore.save({
         "key": adopterKey,
@@ -490,9 +253,94 @@ async function getAdopterById(adopterId)
     })
 }
 
-// Update an adopter's properties (PATCH)
+// Edit an adopter's properties (PUT/PATCH)
+async function editAdopter(adopterId, adopterName, adopterContact, adopterPets)
+{
+    // Generates a key complete with id
+    const adopterKey = datastore.key([
+        ADOPTER,
+        parseInt(adopterId, 10)
+    ]); 
+    const contactInfo = {
+        "email": adopterContact[0].email,
+        "phone_number": adopterContact[0].phone_number
+    };
+    const newAdopter = {
+        "name": adopterName,
+        "contact": contactInfo,
+        "pets": adopterPets
+    };
+    return datastore.save({
+        "key": adopterKey,
+        "data": newAdopter
+    })
+    .then(() => {
+        return adopterKey;
+    });
+}
 
-// Put an animal in the adopter's care (PUT)
+// Assign an animal to an adopter
+async function assignAnimalToAdopter(animal, adopter)
+{
+    const animalKey = datastore.key([
+        ANIMAL,
+        parseInt(animal.id, 10)
+    ]);
+    // adopter info to add to animal's location property
+    let adopterToAdd = {
+        "id": adopter.id,
+        "name": adopter.name
+    };
+    // animal info to add to the adopter's pets property
+    let animalToAdd = {
+        "id": animal.id,
+        "name": animal.name,
+        "species": animal.species
+    }; 
+    // update animal's location property with adopterToAdd
+    const newAnimal = {
+        name: animal.name,
+        species: animal.species,
+        breed: animal.breed, 
+        age: animal.age,
+        gender: animal.gender,
+        colors: animal.colors,
+        attributes: animal.attributes,
+        adopt_status: animal.adopt_status,
+        location: adopterToAdd,
+        user: animal.user
+    }; 
+    // Save animal details with the adopter in location property
+    return datastore.save({
+        "key": animalKey,
+        "data": newAnimal
+    })
+    .then(() => {
+        addAnimalToAdopter(animalToAdd, adopter);
+        return animalKey; 
+    })
+}
+
+// Add an animal to the adopter's pet's array
+async function addAnimalToAdopter(animalToAdd, adopter)
+{
+    const adopterKey = datastore.key([
+        ADOPTER,
+        parseInt(adopter.id, 10)
+    ]); 
+    adopter.pets.push(animalToAdd);
+    const newAdopter = {
+        name: adopter.name,
+        contact: adopter.contact,
+        pets: adopter.pets
+    };
+    return datastore.save({
+        "key": adopterKey,
+        "data": newAdopter
+    }).then(() => {
+        return adopterKey;
+    })
+}
 
 // Delete an adopter (DELETE)
 async function deleteAdopter(adopterId)
@@ -504,7 +352,41 @@ async function deleteAdopter(adopterId)
     return datastore.delete(adopterKey);
 }
 
-// Delete the association between the adopter and the animal (DELETE)
+// Remove the association between a pet and an adopter
+// Used when the animal is deleted or the animal is moved back to the shelter
+async function removeAnimalFromAdopter(adopterId, animalId, adopterName, adopterContact, adopterPets)
+{
+    const adopterKey = datastore.key([
+        ADOPTER,
+        parseInt(adopterId, 10)
+    ]); 
+    let unloadedPets = []; 
+    // add all the pets whose id doesn't match the pet we are trying to remove
+    const allPetsLen = adopterPets.length;
+    for (let i = 0; i < allPetsLen; i++)
+    {
+        if (adopterPets[i].id !== animalId) 
+        {
+            unloadedPets.push(adopterPets[i]); 
+        }
+    }; 
+    // if it is the only animal in the adopter's care, then clear the pets array
+    if (unloadedPets.length === 0) {
+        unloadedPets = [];
+    };
+    const updatedAdopter = {
+        name: adopterName,
+        contact: adopterContact,
+        pets: unloadedPets
+    };
+    return datastore.save({
+        key: adopterKey,
+        data: updatedAdopter
+    })
+    .then(() => {
+        return adopterKey;
+    });
+}
 
 /* ------------- End Adopters Model Functions ------------- */ 
 
@@ -517,10 +399,9 @@ async function addUser(user_id, email)
 {
     const userKey = datastore.key(USER); 
     const newUser = {
-        "unique_id": user_id,
+        "user_id": user_id,
         "email": email,
-        "shelter": null,
-        // "animal": req.body.animals,
+        "animals": []
     };
     return datastore.save({
         "key": userKey,
@@ -559,6 +440,19 @@ async function getAllUsers(req)
     });
 }
 
+// Function to check if user is already in the datastore
+async function checkIfUserInDatastore(user_id)
+{
+    const query = datastore.createQuery(USER).filter('user_id', '=', user_id);
+    return datastore.runQuery(query).then( data => {
+        // if the user is found, then return that user's data
+        if (data[0].length !== 0) {
+            return data[0];
+        }
+        return null;
+    })
+}
+
 /* ------------- End Users Model Functions ------------- */
 
 /* ------------- END MODEL FUNCTIONS ------------- */
@@ -568,7 +462,7 @@ async function getAllUsers(req)
 
 /* ------------- Begin Animals Controller Functions ------------- */
 // POST an animal
-animalsRouter.post('/', checkJwt, (req, res) => {
+animalsRouter.post('/', (req, res) => {
     // gets the JWT
     const jwToken = req.header('authorization');
     console.log(jwToken);
@@ -580,44 +474,27 @@ animalsRouter.post('/', checkJwt, (req, res) => {
     else if (req.body.name === undefined || req.body.species === undefined || 
         req.body.breed === undefined || req.body.age === undefined ||
         req.body.gender === undefined || req.body.colors === undefined ||
-        req.body.attributes === undefined || req.body.adopt_status === undefined)
+        req.body.adoptable === undefined || req.body.microchipped === undefined)
     {
         res.status(400).json({ 'Error': 'The request object is missing at least one required attribute.' }); 
     }
-    // If JWT is invalid or missing, status code 401 is returned
-    else if (jwToken === null || jwToken === undefined) {
-        res.status(401).json({ 'Error': 'Invalid jwt.' });
-    }
-    // If JWT is valid the animal is created
     else 
-        console.log(jwToken);
+    {
         const decodedJwt = jwtDecode(jwToken);
         const user = decodedJwt['sub']; 
-        addAnimal(req)
+        addAnimal(req, user)
         .then(key => {
             getAnimalById(key.id)
             .then (entity => {
-                const newAnimal = addSelfLink(key.id, entity[0], req, "animals");
-                const formattedAnimal = {
-                    id: newAnimal.id,
-                    name: newAnimal.name,
-                    species: newAnimal.species,
-                    breed: newAnimal.breed,
-                    age: newAnimal.age,
-                    gender: newAnimal.gender,
-                    colors: newAnimal.colors,
-                    attributes: newAnimal.attributes,
-                    adopt_status: newAnimal.adopt_status,
-                    location: newAnimal.location
-                }
+                const formattedAnimal = formatAnimals(entity, req);
                 res.status(201).send(formattedAnimal);
             })
         })
-    
+    }
 })
 
-// GET all animals
-animalsRouter.get('/', function(req, res) {
+// GET all animals in the datastore
+animalsRouter.get('/', checkJwtForUnprotected(), function(req, res) {
     const animals = getAllAnimals(req)
     .then( animals => {
         res.status(200).json(animals);
@@ -625,21 +502,206 @@ animalsRouter.get('/', function(req, res) {
 })
 
 // GET an animal based on the id
+animalsRouter.get('/:animal_id', checkJwtForUnprotected(), (req, res) => {
+    getAnimalById(req.params.animal_id)
+    .then(animal => {
+        // Only support viewing of the animal as application/json
+        const accepts = req.accepts(['application/json']);
+        if (!accepts) {
+            res.status(406).send({ 'Error': 'MIME Type not supported by endpoint' });
+        }
+        else if (animal[0] === undefined || animal[0] === null) {
+            res.status(404).json({ 'Error': 'No animal with this animal_id is found.' }); 
+        } else {
+            const formattedAnimal = formatAnimals(animal, req);
+            res.status(200).json(formattedAnimal); 
+        }
+    })
+})
 
-// PATCH - partial update of >=1 attributes of an animal
+// PATCH - Update any subset of attributes of an animal
+animalsRouter.patch('/:animal_id', (req, res) => {
+    // first get the animal
+    getAnimalById(req.params.animal_id)
+    // promise returns value of animal as an array
+    .then(animal => {  
+        // if the animal is not found
+        if (animal[0] === undefined || animal[0] === null)
+        {
+            res.status(404).json({ 'Error': 'The specified animal does not exist' }).end(); 
+        }
+        else {
+            const currAnimal = animal[0];
+            // Get the value(s) we would like to update
+            let animalName = currAnimal.name; 
+            let animalSpecies = currAnimal.species;
+            let animalBreed = currAnimal.breed;
+            let animalAge = currAnimal.age;
+            let animalGender = currAnimal.gender;
+            let animalColors = currAnimal.colors;
+            let animalAdoptable = currAnimal.adoptable;
+            let animalMicrochipped = currAnimal.microchipped;
+            let animalLocation = currAnimal.location;
+            if (req.body.name !== undefined) {
+                animalName = req.body.name; 
+            } 
+            if (req.body.species !== undefined) {
+                animalSpecies = req.body.species; 
+            }
+            if (req.body.breed !== undefined) {
+                animalBreed = req.body.breed;
+            } 
+            if (req.body.age !== undefined) {
+                animalAge = req.body.age;
+            } 
+            if (req.body.gender !== undefined) {
+                animalGender = req.body.gender;
+            } 
+            if (req.body.colors !== undefined) {
+                animalColors = req.body.colors;
+            }
+            if (req.body.adoptable !== undefined) {
+                animalAdoptable = req.body.adoptable;
+            }
+            if (req.body.microchipped !== undefined) {
+                animalMicrochipped = req.body.microchipped;
+            }
+            if (req.body.location !== undefined) {
+                animalLocation = req.body.location;
+            }
+            editAnimal(currAnimal.id, animalName, animalSpecies, animalBreed, animalAge, animalGender, animalColors, animalAdoptable, animalMicrochipped, animalLocation)
+            .then(key => {
+                getAnimalById(key.id)
+                .then(animal => {
+                    const editedAnimal = formatAnimals(animal, req);
+                    res.status(200).json(editedAnimal);
+                })
+            })
+        }
+    })
+})
 
-// PUT - full update of all attributes of an animal
+// PUT - update all attributes of an animal
+animalsRouter.put('/:animal_id', (req, res) => {
+    // if the request is missing any parameters (except location and user), the animal is not edited
+    if (req.body.name === undefined || req.body.species === undefined ||
+        req.body.breed === undefined || req.body.age === undefined ||
+        req.body.gender === undefined || req.body.colors === undefined ||
+        req.body.adoptable === undefined || req.body.microchipped === undefined ||
+        req.body.location === undefined)  
+    {
+        res.status(400).json({ 'Error': 'The request object is missing at least one of the required attributes.' }).end();
+    }
+    else 
+    {
+        getAnimalById(req.params.animal_id)
+        .then(animal => {
+            if (animal[0] === undefined || animal[0] === null)
+            {
+                res.status(404).json({'Error': 'No animal with this animal_id exists.' }).end(); 
+            }
+            else {
+                editAnimal(req.params.animal_id, req.body.name, req.body.species, req.body.breed,req.body.age, req.body.gender, req.body.colors, req.body.adopt_status, req.body.location)
+                .then(key => {
+                    getAnimalById(key.id)
+                    .then(animal => {
+                        const editedAnimal = formatAnimals(animal, req);
+                        res.status(200).json(editedAnimal);
+                    })
+                })
+            }
+        })
+    }
+})
 
-// PUT - associate a shelter or adopter with the animal
+// PUT - assign a shelter to the animal
+animalsRouter.put('/:animal_id/shelters/:shelter_id', (req, res) => {
+    console.log('Entering put MODE');
+    getShelterById(req.params.shelter_id)
+    .then(shelter => {
+        if (shelter[0] === undefined || shelter[0] === null)
+        {
+            res.status(404).json({ 'Error': 'The specified shelter does not exist.' }); 
+        }
+        else 
+        {
+            getAnimalById(req.params.animal_id)
+            .then(animal => {
+                assignShelterToAnimal(shelter[0], animal[0])
+                .then(key => {
+                    getAnimalById(key.id).then(newAnimal => {
+                        console.log(newAnimal);
+                    const formattedAnimal = formatAnimals(newAnimal, req);
+                    res.status(200).json(formattedAnimal);
+                    })
+                });
+            })
+        }
+    })
+})
+
 
 // DELETE - Delete an animal
+animalsRouter.delete('/:animal_id', (req, res) => {
+    // if the animal is associated with a shelter or adopter, remove the animal from the shelter's 'animals' or the adopter's 'pets' property
+    getAnimalById(req.params.animal_id)
+    .then(animal => {
+        if (animal[0] === undefined || animal[0] === null) {
+            res.status(404).json({ 'Error': 'No animal with this animal_id exists.' })
+        }
+        // if the animal is associated with a shelter, remove it from the shelter's animals array
+        else if (animal[0].location !== null && animal[0].location.type === "shelter") {
+            const shelterId = animal[0].location.id; 
+            getShelterById(shelterId)
+            .then(shelter => {
+                removeAnimalFromShelter(shelter[0].id, animal[0].id, shelter[0].name, shelter[0].address, shelter[0].email, shelter[0].phone_number, shelter[0].animals, shelter[0].user).then(() => {
+                    deleteAnimal(animal[0].id).then(res.status(204).end()); 
+                })
+            })
+        }
+    })
+})
 
-// DELETE - Delete the shelter from the animal
+// DELETE - Delete the shelter from the animal (without removing the entire animal)
+animalsRouter.delete('/:animal_id/shelters/:shelter_id', (req, res) => {
+    getAnimalById(req.params.animal_id)
+    .then(animal => {
+        if (animal[0] === undefined || animal[0] === null)
+        {
+            res.status(404).json({ "Error": "No animal with this animal_id exists" });
+        }
+        else {
+            getShelterById(req.params.shelter_id)
+            .then(shelter => {
+                if (shelter[0] === undefined || shelter[0] === null)
+                {
+                    res.status(404).json({
+                        "Error": "No animal with this animal_id is in the shelter with the shelter_id"
+                    }); 
+                }
+                else {
+                    console.log(checkIfAnimalInShelter(shelter[0].animals, animal[0].id));
+                    if (!checkIfAnimalInShelter(shelter[0].animals, animal[0].id)) 
+                    {
+                        res.status(404).json({ "Error": "No animal with this animal_id is in the shelter with the shelter_id" })
+                    }
+                    else {
+                        removeAnimalFromShelter(req.params.shelter_id, req.params.animal_id, shelter[0].name, shelter[0].address, shelter[0].email, shelter[0].phone_number, shelter[0].animals, shelter[0].user)
+                        .then(
+                            removeLocationFromAnimal(req.params.animal_id, animal[0].name, animal[0].species, animal[0].breed, animal[0].age, animal[0].gender, animal[0].colors, animal[0].adoptable, animal[0].microchipped)
+                            .then(res.status(204).end()) 
+                        )
+                    }
+                }
+            })
+        }
+    })
+})
 
 /* ------------- End Animals Controller Functions ------------- */
 
 /* ------------- Begin Shelters Controller Functions ------------- */
-// POST an shelter
+// POST an shelter (protected route)
 sheltersRouter.post('/', checkJwt, (req, res) => {
     // gets the JWT 
     const jwToken = req.header('authorization');
@@ -649,60 +711,290 @@ sheltersRouter.post('/', checkJwt, (req, res) => {
     }
     // if request is missing any required parameters, the shelter is not created and status is 400
     if (req.body.name === undefined || req.body.address === undefined || 
-        req.body.email === undefined || req.body.phone === undefined) 
+        req.body.phone_number === undefined) 
     {
         res.status(400).json({ 'Error': 'The request object is missing at least one required attribute.' });
-    }
-    // if JWT is invalid or missing, status code 401 is returned
-    else if (jwToken === null || jwToken === undefined) {
-        res.status(401).json({ 'Error': 'Invalid jwt.' });
     }
     // if JWT is valid, the shelter is created and the user is set to the 'sub' property in the JWT
     else {
         const decodedJwt = jwtDecode(jwToken);
         addShelter(req, decodedJwt['sub'])
         .then(key => {
-            getShelterById(key.id)
-            .then(shelter => {
-                const newShelter = addSelfLink(key.id, shelter, req, "shelters"); 
-                res.status(201).send(newShelter);
-            }); 
+            if (key === null) {
+                res.status(403).json({
+                    'Error': 'A shelter with that name already exists'
+                }).end();
+            }
+            else {
+                getShelterById(key.id)
+                .then(shelter => {
+                    const newShelter = addSelfLink(key.id, shelter, req, "shelters"); 
+                    res.status(201).send(newShelter);
+                }); 
+            }
         }); 
     };
 })
 
-// GET all shelters
+// GET all shelters (protected route)
+sheltersRouter.get('/', checkJwt, (req, res) => {
+    getAllShelters(req)
+    .then(shelters => {
+        res.status(200).json(shelters);
+    })
+})
 
-// GET a shelter based on the id
+// GET a shelter based on the id (protected route)
+sheltersRouter.get('/:shelter_id', checkJwt, (req, res) => {
+    getShelterById(req.params.shelter_id)
+    .then(shelter => {
+        // Only support viewing of the animal as application/json
+        const accepts = req.accepts(['application/json']);
+        if (!accepts) {
+            res.status(406).send({ 'Error': 'MIME Type not supported by endpoint' });
+        }
+        else if (shelter[0] === undefined || shelter[0] === null)
+        {
+            res.status(404).json({ 'Error': 'No shelter with this shelter_id exists' }); 
+        } 
+        else {
+            const shelterToDisplay = formatShelters(shelter, req); 
+            res.status(200).json(shelterToDisplay);
+        }
+    })
+})
 
-// PATCH - partial update of >=1 attributes of a shelter
+// PATCH - update any subset of properties of a shelter (protected route)
+sheltersRouter.patch('/:shelter_id', checkJwt, function(req, res) {
+    // request must be JSON
+    if (req.get('content-type') !== 'application/json') {
+        res.status(415).json({
+            'Error': 'The server only accepts application/json data.'
+        })
+    }
+    else {
+        // Set the properties
+        let newName = req.body.name;
+        let newAddress = req.body.address;
+        let newEmail = req.body.email;
+        let newPhoneNumber = req.body.phone_number;
+        let newAnimals = req.body.animals; 
+        // Retrieve the shelter we want to edit
+        getShelterById(req.params.shelter_id)
+        .then(shelter => {
+            if (shelter[0] === undefined || shelter[0] === null)
+            {
+                res.status(404).json({ 
+                    'Error': 'No shelter with this shelter_id exists'
+                }).end();
+            }
+            else {
+                if (req.body.name === undefined || req.body.name === null)
+                    newName = shelter[0].name;
+                if (req.body.address === undefined || req.body.address === null)
+                    newAddress = shelter[0].address;
+                if (req.body.email === undefined || req.body.email === null)
+                    newEmail = shelter[0].email;
+                if (req.body.phone_number === undefined || req.body.phone_number === null)
+                    newPhoneNumber = shelter[0].phone_number;
+                if (req.body.animals === undefined)
+                    newAnimals = shelter[0].animals;
+                editShelter(req.params.shelter_id, newName, newAddress, newEmail, newPhoneNumber, newAnimals, shelter[0].user)
+                .then( key => {
+                    // make sure the shelter name is already taken
+                    if (key === null) {
+                        res.status(403).json({
+                            'Error': 'A shelter with that name already exists'
+                        });
+                    } 
+                    else {
+                        getShelterById(key.id)
+                        .then(shelter => {
+                            const formattedShelter = formatShelters(shelter, req);
+                            res.status(200).json(formattedShelter);
+                        })
+                    }
+                })
+            }
+        })
+    }
+})
 
-// PUT - full update of all attributes of a shelter
+// PUT - full update of all editable attributes of a shelter (aside from pets and user)
+sheltersRouter.put('/:shelter_id', checkJwt, (req, res) => {
+    // retrieve the shelter to update
+    getShelterById(req.params.shelter_id)
+    .then(shelter => {
+        if (shelter[0] === undefined || shelter[0] === null)
+        {
+            res.status(404).json({
+                'Error': 'No shelter with this shelter_id exists'
+            });
+        }
+        else {
+            editShelter(req.params.shelter_id, req.body.name, req.body.address, req.body.email, req.body.phone_number, shelter[0].animals, shelter[0].user)
+            .then(key => {
+                // Make sure the shelter name is not already in datastore
+                if (key === null) {
+                    res.status(403).json({
+                        'Error': 'A shelter with that name already exists'
+                    }); 
+                }
+                else {
+                    getShelterById(key.id)
+                    .then(shelter => {
+                        const formattedShelter = editShelter(addSelfLink(shelter[0].id, shelter[0], req));
+                        res.status(200).json(formattedShelter);
+                        // res.status(204).end(); 
+                    })
+                }
+            }) 
+        }
+    })
+})
 
-// PUT - associate an animal with the shelter
+// PUT - associate an animal with the shelter (through shelters route)
+sheltersRouter.put('/:shelter_id/animals/:animal_id', (req, res) => {
+    getShelterById(req.params.shelter_id)
+    .then(shelter => {
+        if (shelter[0] === undefined || shelter[0] === null)
+        {
+            res.status(404).json({
+                'Error': 'No shelter with this shelter_id exists'
+            }); 
+        }
+        else {
+            getAnimalById(req.params.animal_id)
+            .then(animal => {
+                if (animal[0] === undefined || animal[0] === null)
+                {
+                    res.status(404).json({
+                        'Error': 'No animal with this animal_id exists'
+                    }); 
+                }
+                // if both shelter and animal are in db, check if the animal is in the shelter
+                else if (animal[0].location != null) 
+                {
+                    res.status(403).json({
+                        'Error': 'The animal is already in another shelter'
+                    }); 
+                }
+                else {
+                    assignShelterToAnimal(shelter[0], animal[0]).then(() => {
+                        getShelterById(req.params.shelter_id).then(entity => {
+                            const formattedShelter = formatShelters(entity, req); 
+                            res.status(200).json(formattedShelter);
+                        })
+                    })
+
+                }
+            })
+        }
+    })
+})
 
 // DELETE - Delete a shelter
+sheltersRouter.delete('/:shelter_id', (req, res) => {
+    getShelterById(req.params.shelter_id)
+    .then(shelter => {
+        if (shelter[0] === undefined || shelter[0] === null)
+        {
+            res.status(404).json({
+                'Error': 'No shelter with this shelter_id is found'
+            }); 
+        }
+        // if there are animals associated with the shelter, remove the shelter from the animals
+        else if (shelter[0].animals.length !== 0){
+            const shelterAnimalsLen = shelter[0].animals.length; 
+            for (let i = 0; i < shelterAnimalsLen; i++) {
+                const animal = shelter[0].animals[i]
+                const animalId = animal.id;
+                getAnimalById(animalId).then(animal => {
+                    deleteShelter(req.params.shelter_id)
+                    .then( () => {
+                        removeLocationFromAnimal(animalId, animal[0].name, animal[0].species, animal[0].breed, animal[0].age, animal[0].gender, animal[0].colors, animal[0].adoptable, animal[0].microchipped)
+                        .then(res.status(204).end());
+                    })
+                })
+            }
+        }
+    })
+})
 
-// DELETE - Remove the animal from the shelter
+// DELETE - Remove the animal from the shelter (wihtout deleting the entire shelter or animal entity) (protected route)
+sheltersRouter.delete('/:shelter_id/animals/animal_id', checkJwt, (req, res) => {
+    // make sure that the shelter exists
+    getShelterById(req.params.shelter_id)
+    .then(shelter => {
+        if (shelter[0] === undefined || shelter[0] === null)
+        {
+            res.status(404).json({
+                'Error': 'No shelter with this shelter_id exists'
+            });
+        }
+        else {
+            // make sure that the animal exists
+            getAnimalById(req.params.animal_id)
+            .then(animal => {
+                if (animal[0] === undefined || animal[0] === null)
+                {
+                    res.status(404).json({
+                        'Error': 'No animal with this animal_id exists'
+                    })
+                }
+                // animal and shelter exists, now check to see if the animal is at this shelter
+                else if (checkIfAnimalInShelter(shelter[0].animals, req.params.animal_id)) {
+                    // if yes then proceed to removing the animal from the shelter
+                    removeAnimalFromShelter(req.params.shelter_id, req.params.animal_id, shelter[0].name, shelter[0].address, shelter[0].email, shelter[0].phone_number, shelter[0].animals, shelter[0].user)
+                    .then(res.status(204).end());
+                }
+            })
+        }
+    })
+})
 
 /* ------------- End Shelters Controller Functions ------------- */
 
 /* ------------- Begin Adopters Controller Functions ------------- */
 // POST an adopter
+adoptersRouter.post('/', (req, res) => {
+
+}) 
 
 // GET all adopters
+adoptersRouter.get('/', (req, res) => {
+
+})
 
 // GET an adopter based on the id
+adoptersRouter.get('/:adopter_id', (req, res) => {
 
-// PATCH - partial update of >=1 attributes of an adopter
+})
+
+// PATCH - update of a subset of attributes of an adopter
+adoptersRouter.patch('/:adopter_id', (req, res) => {
+
+})
 
 // PUT - full update of all attributes of an adopter
+adoptersRouter.put('/:adopter_id', (req, res) => {
+
+})
 
 // PUT - associate an animal with the adopter
+adoptersRouter.put('/:adopter_id/animals/:animal_id', (req, res) => {
+
+})
 
 // DELETE - Delete an adopter
+adoptersRouter.delete('/:adopter_id', (req, res) => {
+
+})
 
 // DELETE - Remove the animal from the adopter
+adoptersRouter.delete('/:adopter_id/animals/:animal_id', (req, res) => {
+    
+})
 
 /* ------------- End Adopters Controller Functions ------------- */
 
@@ -714,6 +1006,22 @@ login.post('/', function(req, res) {
 })
 
 // GET all users
+usersRouter.get('/', function(req, res) {
+    const allUsers = getAllUsers(req)
+    .then(users => {
+        const formattedUsers = formatUsers(users, req);
+        res.status(200).json(formattedUsers);
+    })
+})
+
+// GET a specified user based on the given id
+usersRouter.get('/:user_id', function(req, res) {
+    getUserById(req.params.user_id)
+    .then(user => {
+        const formattedUser = formatUsers(user, req);
+        res.status(200).json(formattedUser);
+    })
+})
 
 /* ------------- End Users Controller Functions ------------- */
 
@@ -725,6 +1033,8 @@ app.use('/adopters', adoptersRouter);
 app.use('/users', usersRouter); 
 // app.use('/login', login);
 app.use('/', router);
+
+app.use(checkJwt);
 
 app.use(function(err, req, res, next) {
     if (err.name === 'UnauthorizedError') {
