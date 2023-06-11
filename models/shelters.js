@@ -2,12 +2,10 @@ const { Datastore } = require('@google-cloud/datastore');
 const datastore = new Datastore();
 const { addSelfLink, fromDatastore, formatAnimals, formatShelters, formatUsers } = require('../formats');
 const { checkIfAnimalInShelter } = require('./animals');
+const { addShelterToUser } = require('./users');
 
 // Constants
-const ANIMAL = "Animal";
 const SHELTER = "Shelter";
-const ADOPTER = "Adopter";
-const USER = "User"; 
 
 /* ------------- Begin Shelters Model Functions ------------- */
 // Add a shelter (POST) 
@@ -21,16 +19,14 @@ async function addShelter(req, user)
     if (shelters.length > 0) {
         return null;
     }
-    let email = req.body.email; 
-    if (req.body.email === undefined || req.body.email === null) 
-    {
-        email = null;
-    }
+    let website = req.body.website; 
+    if (req.body.website === undefined || req.body.website === null) 
+        website = null;
     const newShelter = {
         "name": req.body.name,
         "address": req.body.address,
-        "email": email,
-        "phone_number": req.body.phone_number,
+        "contact": req.body.contact,
+        "website": website,
         "animals": [],
         "user": user
     };
@@ -89,7 +85,7 @@ async function getShelterById(shelterId)
 }
 
 // Edit a shelter's properties (PATCH/PUT)
-async function editShelter(shelterId, shelterName, shelterAddress, shelterEmail, shelterPhoneNumber, shelterAnimals, shelterUser)
+async function editShelter(shelterId, shelterName, shelterAddress, shelterContact, shelterWebsite, shelterAnimals, shelterUser)
 {
     const shelterKey = datastore.key([
         SHELTER,
@@ -109,8 +105,8 @@ async function editShelter(shelterId, shelterName, shelterAddress, shelterEmail,
     const newShelter = {
         "name": shelterName,
         "address": shelterAddress,
-        "email": shelterEmail,
-        "phone_number": shelterPhoneNumber,
+        "contact": shelterContact, 
+        "website": shelterWebsite,
         "animals": shelterAnimals,
         "user": shelterUser
     };
@@ -135,8 +131,8 @@ async function addAnimalToShelter(animalToAdd, shelter)
     const newShelter = {
         "name": shelter.name,
         "address": shelter.address,
-        "email": shelter.email,
-        "phone_number": shelter.phone_number,
+        "contact": shelter.contact,
+        "website": shelter.website,
         "animals": shelter.animals,
         "user": shelter.user
     };
@@ -161,7 +157,7 @@ async function deleteShelter(shelterId)
 
 // Remove the association between the shelter and the animal
 // Used when an animal is deleted or the animal has been adopted
-async function removeAnimalFromShelter(shelterId, animalId, shelterName, shelterAddress, shelterEmail, shelterPhoneNumber, shelterAnimals, shelterUser)
+async function removeAnimalFromShelter(shelterId, animalId, shelterName, shelterAddress, shelterContact, shelterWebsite, shelterAnimals, shelterUser)
 {
     const shelterKey = datastore.key([
         SHELTER,
@@ -169,6 +165,7 @@ async function removeAnimalFromShelter(shelterId, animalId, shelterName, shelter
     ]); 
     let unloadedArray = [];
     const shelterAnimalsLen = shelterAnimals.length; 
+    console.log(shelterAnimals);
     // Add all animals that are not the specified animalId to the new unloadedArray
     for (let i = 0; i < shelterAnimalsLen; i++)
     {
@@ -183,8 +180,8 @@ async function removeAnimalFromShelter(shelterId, animalId, shelterName, shelter
     const newShelter = {
         "name": shelterName,
         "address": shelterAddress,
-        "email": shelterEmail,
-        "phone_number": shelterPhoneNumber,
+        "contact": shelterContact,
+        "website": shelterWebsite,
         "animals": unloadedArray,
         "user": shelterUser
     };

@@ -2,6 +2,7 @@ const { Datastore } = require('@google-cloud/datastore');
 const datastore = new Datastore();
 const { addSelfLink, fromDatastore, formatAnimals, formatShelters, formatUsers } = require('../formats');
 const { addAnimalToShelter } = require('./shelters');
+const { addAnimalToAdopter } = require('./adopters');
 
 // Constants
 const ANIMAL = "Animal";
@@ -165,14 +166,13 @@ async function assignAdopterToAnimal(adopter, animal)
         "name": adopter.name,
         "type": "adopter"
     };
-    // animal to be added to the shelter entity
+    // animal to be added to the adopter entity
     let animalToAdd = {
         "id": animal.id,
         "name": animal.name,
-        "species": animal.species,
-        "adoptable": animal.adopt_status
+        "species": animal.species
     }
-    // updated animal with the shelter added
+    // updated animal with the adopter added
     const updatedAnimal = {
         "name": animal.name,
         "species": animal.species,
@@ -182,7 +182,7 @@ async function assignAdopterToAnimal(adopter, animal)
         "colors": animal.colors,
         "adoptable": animal.adoptable,
         "microchipped": animal.microchipped,
-        "location": adopterToAdd,  // contains id, name, address, and contact of the shelter
+        "location": adopterToAdd,  // contains id and name of the adopter
     };
     // add the updated animal (with the specified shelter) to datastore
     return datastore.save({

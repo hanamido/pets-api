@@ -1,24 +1,23 @@
 const { Datastore } = require('@google-cloud/datastore');
 const datastore = new Datastore();
-const { addSelfLink, fromDatastore, formatAnimals, formatShelters, formatUsers } = require('../formats');
+const { fromDatastore, formatAdopters } = require('../formats');
 const { checkIfAnimalWithAdopter } = require('./animals');
 
 // Constants
-const ANIMAL = "Animal";
-const SHELTER = "Shelter";
 const ADOPTER = "Adopter";
-const USER = "User"; 
 
 /* ------------- Begin Adopters Model Functions ------------- */
 // Add an adopter (POST) 
-async function addAdopter(req)
+async function addAdopter(req, user)
 {
     const adopterKey = datastore.key(ADOPTER); 
     const newAdopter = {
         "name": req.body.name,
         "address": req.body.address,
-        "contact": req.body.contact,
-        "pets": req.body.pets
+        "email": req.body.email,
+        "phone_number": req.body.phone_number,
+        "pets": [],
+        "user": user
     };
     return datastore.save({
         "key": adopterKey,
@@ -46,13 +45,7 @@ async function getAllAdopters(req)
         const adopters = results.adopters;
         const adoptersLen = adopters.length; 
         results.total_items = adoptersLen; 
-        for (let i = 0; i < adoptersLen; i++)
-        {
-            let currAdopter = adopters[i]; 
-            // Add the selflink to the entity
-            const newAdopter = addSelfLink(currAdopter.id, currAdopter, req, "adopters"); 
-            adopters[i] = newAdopter; 
-        }
+        results.adopters = formatAdopters(adopters, req);
         if (typeof prev !== 'undefined') {
             results.previous = prev;
         }
@@ -81,21 +74,19 @@ async function getAdopterById(adopterId)
 }
 
 // Edit an adopter's properties (PUT/PATCH)
-async function editAdopter(adopterId, adopterName, adopterContact, adopterPets)
+async function editAdopter(adopterId, adopterName, adopterEmail, adopterPhoneNumber, adopterPets, adopterUser)
 {
     // Generates a key complete with id
     const adopterKey = datastore.key([
         ADOPTER,
         parseInt(adopterId, 10)
     ]); 
-    const contactInfo = {
-        "email": adopterContact[0].email,
-        "phone_number": adopterContact[0].phone_number
-    };
     const newAdopter = {
         "name": adopterName,
-        "contact": contactInfo,
-        "pets": adopterPets
+        "email": adopterEmail,
+        "phone_number": adopterPhoneNumber,
+        "pets": adopterPets,
+        "user": adopterUser
     };
     return datastore.save({
         "key": adopterKey,
@@ -104,48 +95,6 @@ async function editAdopter(adopterId, adopterName, adopterContact, adopterPets)
     .then(() => {
         return adopterKey;
     });
-}
-
-// Assign an animal to an adopter
-async function assignAnimalToAdopter(animal, adopter)
-{
-    const animalKey = datastore.key([
-        ANIMAL,
-        parseInt(animal.id, 10)
-    ]);
-    // adopter info to add to animal's location property
-    let adopterToAdd = {
-        "id": adopter.id,
-        "name": adopter.name
-    };
-    // animal info to add to the adopter's pets property
-    let animalToAdd = {
-        "id": animal.id,
-        "name": animal.name,
-        "species": animal.species
-    }; 
-    // update animal's location property with adopterToAdd
-    const newAnimal = {
-        name: animal.name,
-        species: animal.species,
-        breed: animal.breed, 
-        age: animal.age,
-        gender: animal.gender,
-        colors: animal.colors,
-        attributes: animal.attributes,
-        adopt_status: animal.adopt_status,
-        location: adopterToAdd,
-        user: animal.user
-    }; 
-    // Save animal details with the adopter in location property
-    return datastore.save({
-        "key": animalKey,
-        "data": newAnimal
-    })
-    .then(() => {
-        addAnimalToAdopter(animalToAdd, adopter);
-        return animalKey; 
-    })
 }
 
 // Add an animal to the adopter's pet's array
@@ -158,8 +107,10 @@ async function addAnimalToAdopter(animalToAdd, adopter)
     adopter.pets.push(animalToAdd);
     const newAdopter = {
         name: adopter.name,
-        contact: adopter.contact,
-        pets: adopter.pets
+        email: adopter.email,
+        phone_number: adopter.phone_number,
+        pets: adopter.pets,
+        user: adopter.user
     };
     return datastore.save({
         "key": adopterKey,
@@ -181,7 +132,7 @@ async function deleteAdopter(adopterId)
 
 // Remove the association between a pet and an adopter
 // Used when the animal is deleted or the animal is moved back to the shelter
-async function removeAnimalFromAdopter(adopterId, animalId, adopterName, adopterContact, adopterPets)
+async function removeAnimalFromAdopter(adopterId, animalId, adopterName, adopterEmail, adopterPhoneNumber, adopterPets, adopterUser)
 {
     const adopterKey = datastore.key([
         ADOPTER,
@@ -203,8 +154,10 @@ async function removeAnimalFromAdopter(adopterId, animalId, adopterName, adopter
     };
     const updatedAdopter = {
         name: adopterName,
-        contact: adopterContact,
-        pets: unloadedPets
+        email: adopterEmail,
+        phone_number: adopterPhoneNumber,
+        pets: unloadedPets,
+        user: adopterUser
     };
     return datastore.save({
         key: adopterKey,
@@ -217,12 +170,13 @@ async function removeAnimalFromAdopter(adopterId, animalId, adopterName, adopter
 
 /* ------------- End Adopters Model Functions ------------- */ 
 
+/* ------------- End Adopters Model Functions ------------- */ 
+
 module.exports = {
     addAdopter: addAdopter,
     getAllAdopters: getAllAdopters,
     getAdopterById: getAdopterById,
     editAdopter: editAdopter,
-    assignAnimalToAdopter: assignAnimalToAdopter,
     addAnimalToAdopter: addAnimalToAdopter, 
     deleteAdopter: deleteAdopter,
     removeAnimalFromAdopter: removeAnimalFromAdopter

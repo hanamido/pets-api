@@ -23,7 +23,7 @@ function formatAnimals(animals, req)
 {
     if (Object.keys(animals).length === 1) {
         let newLocation = null;
-        if (animals[0].location !== null) {
+        if (animals[0].location !== null && animals[0].location.type !== undefined) {
             newLocation = formatLocationsInAnimals(animals[0], animals[0].location.type);
         }
         const animal = addSelfLink(animals[0].id, animals[0], req, "animals");
@@ -98,22 +98,13 @@ function formatShelters(shelters, req)
         const animals = shelters[0].animals;
         const animalsLen = animals.length;
         const newAnimal = formatAnimalsInShelters(animals, animalsLen);
-        // const animalsLen = animals.length; 
-        // for (let i = 0; i < animalsLen; i++) {
-        //     animals[i] = {
-        //         id: animals[i].id,
-        //         name: animals[i].name,
-        //         species: animals[i].species,
-        //         adoptable: animals[i].adoptable
-        //     }
-        // }
         const shelter = addSelfLink(shelters[0].id, shelters[0], req, "shelters"); 
         const formattedShelter = {
             id: shelter.id,
             name: shelter.name,
             address: shelter.address, 
-            email: shelter.email,
-            phone_number: shelter.phone_number,
+            contact: shelter.contact,
+            website: shelter.website,
             animals: newAnimal,
             user: shelter.user,
             self: shelter.self
@@ -132,8 +123,8 @@ function formatShelters(shelters, req)
             id: shelter.id,
             name: shelter.name,
             address: shelter.address, 
-            email: shelter.email,
-            phone_number: shelter.phone_number,
+            contact: shelter.contact,
+            website: shelter.website,
             animals: newAnimals,
             user: shelter.user,
             self: shelter.self
@@ -160,11 +151,17 @@ function formatAdopters(adopters, req)
     if (Object.keys(adopters).length === 1)
     {
         const currAdopter = adopters[0];
+        const pets = adopters[0].pets;
+        const petsLen = pets.length;
+        const newPets = formatPetsInAdopters(pets, petsLen);
         const adopter = addSelfLink(currAdopter.id, currAdopter, req, "adopters");
         const formattedAdopter = {
+            id: adopter.id,
             name: adopter.name,
-            contact: adopter.contact,
-            pet: adopter.pet,
+            email: adopter.email,
+            phone_number: adopter.phone_number,
+            pets: newPets,
+            user: adopter.user,
             self: adopter.self
         }; 
         return formattedAdopter;
@@ -173,15 +170,33 @@ function formatAdopters(adopters, req)
     for (let i = 0; i < adoptersLen; i++)
     {
         const currAdopter = adopters[i];
+        const pets = currAdopter.pets;
+        const petsLen = pets.length;
+        const newPets = formatPetsInAdopters(pets, petsLen);
         const adopter = addSelfLink(currAdopter.id, currAdopter, req, "adopters"); 
         adopters[i] = {
+            id: adopter.id,
             name: adopter.name,
-            contact: adopter.contact,
-            pet: adopter.pet,
+            email: adopter.email,
+            phone_number: adopter.phone_number,
+            pets: newPets,
+            user: adopter.user,
             self: adopter.self
         };
     }
     return adopters; 
+}
+
+function formatPetsInAdopters(pets, petsArrLen)
+{
+    for (let i = 0; i < petsArrLen; i++) {
+        pets[i] = {
+            id: pets[i].id,
+            name: pets[i].name,
+            species: pets[i].species
+        }
+    }
+    return pets;   
 }
 
 function formatUsers(users, req) {
@@ -193,7 +208,6 @@ function formatUsers(users, req) {
             ds_id: user.id,
             user_id: user.user_id,
             email: user.email,
-            shelter: user.shelter,
             self: user.self
         }
         return formattedUser; 
@@ -207,7 +221,6 @@ function formatUsers(users, req) {
             ds_id: user.id,
             user_id: user.user_id,
             email: user.email,
-            shelter: user.shelter,
             self: user.self
         }
     }
@@ -219,4 +232,5 @@ exports.fromDatastore = fromDatastore;
 exports.addSelfLink = addSelfLink;
 exports.formatAnimals = formatAnimals;
 exports.formatShelters = formatShelters;
+exports.formatAdopters = formatAdopters;
 exports.formatUsers = formatUsers;
