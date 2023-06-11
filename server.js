@@ -115,7 +115,7 @@ app.use('/animals', animalsRouter);
 app.use('/shelters', sheltersRouter);
 app.use('/adopters', adoptersRouter);
 app.use('/users', usersRouter); 
-app.use('/login', login);
+// app.use('/login', login);
 app.use('/', router);
 
 app.use(checkJwt);

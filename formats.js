@@ -151,9 +151,13 @@ function formatAdopters(adopters, req)
     if (Object.keys(adopters).length === 1)
     {
         const currAdopter = adopters[0];
-        const pets = adopters[0].pets;
-        const petsLen = pets.length;
-        const newPets = formatPetsInAdopters(pets, petsLen);
+        let newPets = [];
+        if (adopters.pets !== undefined && adopters.pets.length >= 1)
+        {
+            const pets = currAdopter.pets;
+            const petsLen = pets.length;
+            newPets = formatPetsInAdopters(pets, petsLen);
+        }
         const adopter = addSelfLink(currAdopter.id, currAdopter, req, "adopters");
         const formattedAdopter = {
             id: adopter.id,
@@ -170,9 +174,13 @@ function formatAdopters(adopters, req)
     for (let i = 0; i < adoptersLen; i++)
     {
         const currAdopter = adopters[i];
-        const pets = currAdopter.pets;
-        const petsLen = pets.length;
-        const newPets = formatPetsInAdopters(pets, petsLen);
+        let newPets = [];
+        if (adopters.pets !== undefined && adopters.pets.length >= 1)
+        {
+            const pets = currAdopter.pets;
+            const petsLen = pets.length;
+            newPets = formatPetsInAdopters(pets, petsLen);
+        }
         const adopter = addSelfLink(currAdopter.id, currAdopter, req, "adopters"); 
         adopters[i] = {
             id: adopter.id,

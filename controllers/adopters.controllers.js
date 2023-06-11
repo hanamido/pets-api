@@ -81,7 +81,13 @@ adoptersRouter.post('/', checkJwt, (req, res) => {
 adoptersRouter.get('/', checkJwt, (req, res) => {
     getAllAdopters(req)
     .then(adopters => {
-        res.status(200).json(adopters);
+        // Only support viewing of the animal as application/json
+        const accepts = req.accepts(['application/json']);
+        if (!accepts) {
+            res.status(406).send({ 'Error': 'MIME Type not supported by endpoint' });
+        }
+        else 
+            res.status(200).json(adopters);
     })
 })
 
@@ -115,17 +121,11 @@ adoptersRouter.get('/:adopter_id', checkJwt, (req, res) => {
 adoptersRouter.patch('/:adopter_id', checkJwt, (req, res) => {
     const jwt = req.header('Authorization');
     const decodedJwt = jwtDecode(jwt);
-    // request must be JSON
-    if (req.get('content-type' !== 'application/json')) {
-        res.status(415).json({
-            'Error': 'The server only accepts application/json data.'
-        })
-    }
-    else {
+    {
         // Set the properties
         let newName = req.body.name;
         let newEmail = req.body.email;
-        let newPhoneNubmer = req.body.phone_number;
+        let newPhoneNumber = req.body.phone_number;
         // Retrieve the adopter we want to edit
         getAdopterById(req.params.adopter_id)
         .then(adopter => {
@@ -140,12 +140,15 @@ adoptersRouter.patch('/:adopter_id', checkJwt, (req, res) => {
                 })
             }
             else {
-                if (req.body.name === undefined || req.body.name === null) 
+                if (req.body.name === undefined || req.body.name === null) {
                     newName = adopter[0].name; 
-                if (req.body.email === undefined || req.body.email === null) 
+                }
+                if (req.body.email === undefined || req.body.email === null) {
                     newEmail = adopter[0].email; 
-                if (req.body.phone_number === undefined || req.body.phone_number === null)
-                    newPhoneNubmer = adopter[0].phone_number;
+                }
+                if (req.body.phone_number === undefined || req.body.phone_number === null) {
+                    newPhoneNumber = adopter[0].phone_number;
+                }
                 editAdopter(req.params.adopter_id, newName, newEmail, newPhoneNumber, adopter[0].pets, adopter[0].user)
                 .then(entity => {
                     getAdopterById(entity.id) 
@@ -311,7 +314,7 @@ adoptersRouter.delete('/:adopter_id/animals/:animal_id', checkJwt, (req, res) =>
                     })
                 }
                 // adopter and animal exists, now check to see if the animal is with this adopter
-                else if (!checkIfAnimalWithAdopter(adopter[0].pets, req.params.adopter_id))
+                else if (!checkIfAnimalWithAdopter(adopter[0].pets, req.params.animal_id))
                 {
                     res.status(404).json({
                         'Error': 'No adopter with this adopter_id has the animal with this animal_id'

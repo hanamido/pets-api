@@ -86,7 +86,13 @@ sheltersRouter.post('/', checkJwt, (req, res) => {
 sheltersRouter.get('/', checkJwt, (req, res) => {
     getAllShelters(req)
     .then(shelters => {
-        res.status(200).json(shelters);
+        // Only support viewing of the animal as application/json
+        const accepts = req.accepts(['application/json']);
+        if (!accepts) {
+            res.status(406).send({ 'Error': 'MIME Type not supported by endpoint' });
+        }
+        else 
+            res.status(200).json(shelters);
     })
 })
 

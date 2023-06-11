@@ -13,7 +13,6 @@ async function addAdopter(req, user)
     const adopterKey = datastore.key(ADOPTER); 
     const newAdopter = {
         "name": req.body.name,
-        "address": req.body.address,
         "email": req.body.email,
         "phone_number": req.body.phone_number,
         "pets": [],

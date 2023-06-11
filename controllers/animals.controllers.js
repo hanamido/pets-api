@@ -107,7 +107,13 @@ animalsRouter.post('/', checkJwtForUnprotected(), (req, res) => {
 animalsRouter.get('/', checkJwtForUnprotected(), function(req, res) {
     const animals = getAllAnimals(req)
     .then( animals => {
-        res.status(200).json(animals);
+        // Only support viewing of the animal as application/json
+        const accepts = req.accepts(['application/json']);
+        if (!accepts) {
+            res.status(406).send({ 'Error': 'MIME Type not supported by endpoint' });
+        }
+        else
+            res.status(200).json(animals);
     })
 })
 
