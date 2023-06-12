@@ -27,6 +27,8 @@ const {
     removeAnimalFromAdopter: removeAnimalFromAdopter
 } = require('../models/adopters');
 
+const { addAdopterToUser } = require('../models/users');
+
 const { formatAdopters } = require('../formats');
 
 const domain = process.env.DOMAIN;
@@ -68,27 +70,33 @@ adoptersRouter.post('/', checkJwt, (req, res) => {
     else {
         addAdopter(req, decodedJwt['sub'])
         .then(entity => {
-            getAdopterById(entity.id)
-            .then(adopter => {
-                const newAdopter = formatAdopters(adopter, req);
-                res.status(201).send(newAdopter);
-            });
+            // add it to that user's adopters array
+            addAdopterToUser(entity, decodedJwt['sub'], req).then(() => {
+                getAdopterById(entity.id)
+                .then(adopter => {
+                    const newAdopter = formatAdopters(adopter, req);
+                    res.status(201).send(newAdopter);
+                });
+            })
         });
     }
 }) 
 
 // GET all adopters (protected)
 adoptersRouter.get('/', checkJwt, (req, res) => {
-    getAllAdopters(req)
-    .then(adopters => {
-        // Only support viewing of the animal as application/json
-        const accepts = req.accepts(['application/json']);
-        if (!accepts) {
-            res.status(406).send({ 'Error': 'MIME Type not supported by endpoint' });
-        }
-        else 
+    const jwt = req.header('Authorization');
+    const decodedJwt = jwtDecode(jwt);
+    // Only support viewing of the animal as application/json
+    const accepts = req.accepts(['application/json']);
+    if (!accepts) {
+        res.status(406).send({ 'Error': 'MIME Type not supported by endpoint' });
+    }
+    else {
+        getAllAdopters(req, decodedJwt['sub'])
+        .then(adopters => {
             res.status(200).json(adopters);
-    })
+        })
+    }
 })
 
 // GET an adopter based on the id (protected)
@@ -151,11 +159,12 @@ adoptersRouter.patch('/:adopter_id', checkJwt, (req, res) => {
                 }
                 editAdopter(req.params.adopter_id, newName, newEmail, newPhoneNumber, adopter[0].pets, adopter[0].user)
                 .then(entity => {
-                    getAdopterById(entity.id) 
-                    .then(returnedAdopter => {
-                        const formattedAdopter = formatAdopters(returnedAdopter, req);
-                        res.status(200).json(formattedAdopter);
-                    })
+                    // getAdopterById(entity.id) 
+                    // .then(returnedAdopter => {
+                    //     const formattedAdopter = formatAdopters(returnedAdopter, req);
+                    //     res.status(200).json(formattedAdopter);
+                    // })
+                    res.status(204).end();
                 })
             }
         })
@@ -183,11 +192,12 @@ adoptersRouter.put('/:adopter_id', checkJwt, (req, res) => {
         else {
             editAdopter(req.params.adopter_id, req.body.name, req.body.email, req.body.phone_number, adopter[0].pets, adopter[0].user)
             .then(entity => {
-                getAdopterById(entity.id)
-                .then(returnedAdopter => {
-                    const formattedAdopter = formatAdopters(returnedAdopter, req); 
-                    res.status(200).json(formattedAdopter);
-                })
+                res.status(204).end();
+                // getAdopterById(entity.id)
+                // .then(returnedAdopter => {
+                //     const formattedAdopter = formatAdopters(returnedAdopter, req); 
+                //     res.status(200).json(formattedAdopter);
+                // })
             })
         }
     })
@@ -228,11 +238,12 @@ adoptersRouter.put('/:adopter_id/animals/:animal_id', checkJwt, (req, res) => {
                     }   
                 }
                 else (
-                    assignAdopterToAnimal(adopter[0], animal[0]).then(() => {
-                        getAdopterById(req.params.adopter_id).then(entity => {
-                            const formattedAdopter = formatAdopters(entity, req);
-                            res.status(200).json(formattedAdopter);
-                        });
+                    assignAdopterToAnimal(adopter[0], animal[0], req).then(() => {
+                        res.status(204).end();
+                        // getAdopterById(req.params.adopter_id).then(entity => {
+                        //     const formattedAdopter = formatAdopters(entity, req);
+                        //     res.status(200).json(formattedAdopter);
+                        // });
                     })
                 )
             })

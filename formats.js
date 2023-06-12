@@ -76,7 +76,8 @@ function formatLocationsInAnimals(animal, locationType)
         newLocation = {
             "id": animal.location.id,
             "name": animal.location.name,
-            "type": locationType
+            "type": locationType,
+            "self": animal.location.self
         }
     }
     else if (animal.location !== null && locationType === 'adopter')
@@ -84,7 +85,8 @@ function formatLocationsInAnimals(animal, locationType)
         newLocation = {
             "id": animal.location.id,
             "name": animal.location.name,
-            "type": locationType
+            "type": locationType,
+            "self": animal.location.self
         }
     }
     return newLocation;
@@ -140,7 +142,8 @@ function formatAnimalsInShelters(animals, animalsArrLen)
             id: animals[i].id,
             name: animals[i].name,
             species: animals[i].species,
-            adoptable: animals[i].adoptable
+            adoptable: animals[i].adoptable,
+            self: animals[i].self
         }
     }
     return animals;   
@@ -152,12 +155,14 @@ function formatAdopters(adopters, req)
     {
         const currAdopter = adopters[0];
         let newPets = [];
-        if (adopters.pets !== undefined && adopters.pets.length >= 1)
+        if (currAdopter.pets !== undefined && currAdopter.pets.length >= 1)
         {
             const pets = currAdopter.pets;
             const petsLen = pets.length;
             newPets = formatPetsInAdopters(pets, petsLen);
         }
+        // newPets = formatPetsInAdopters(currAdopter.pets, currAdopter.pets.length);
+        console.log(newPets);
         const adopter = addSelfLink(currAdopter.id, currAdopter, req, "adopters");
         const formattedAdopter = {
             id: adopter.id,
@@ -201,7 +206,8 @@ function formatPetsInAdopters(pets, petsArrLen)
         pets[i] = {
             id: pets[i].id,
             name: pets[i].name,
-            species: pets[i].species
+            species: pets[i].species,
+            self: pets[i].self
         }
     }
     return pets;   
@@ -211,11 +217,14 @@ function formatUsers(users, req) {
     if (Object.keys(users).length === 1)
     {
         const currUser = users[0];
+        console.log(currUser);
         const user = addSelfLink(currUser.id, currUser, req, "users");
         const formattedUser = {
             ds_id: user.id,
             user_id: user.user_id,
             email: user.email,
+            shelters: user.shelters,
+            adopters: user.adopters,
             self: user.self
         }
         return formattedUser; 

@@ -26,6 +26,8 @@ const {
     removeAnimalFromShelter: removeAnimalFromShelter
 } = require('../models/shelters');
 
+const { addShelterToUser } = require('../models/users');
+
 const { formatShelters } = require('../formats');
 
 const domain = process.env.DOMAIN;
@@ -72,11 +74,14 @@ sheltersRouter.post('/', checkJwt, (req, res) => {
                 }).end();
             }
             else {
-                getShelterById(key.id)
-                .then(shelter => {
-                    const newShelter = formatShelters(shelter, req);
-                    res.status(201).send(newShelter);
-                }); 
+                // add it to that user's shelters array
+                addShelterToUser(key, decodedJwt['sub'], req).then(() => {
+                    getShelterById(key.id)
+                    .then(shelter => {
+                        const newShelter = formatShelters(shelter, req);
+                        res.status(201).send(newShelter);
+                    }); 
+                })
             }
         }); 
     };
@@ -84,16 +89,19 @@ sheltersRouter.post('/', checkJwt, (req, res) => {
 
 // GET all shelters (protected route)
 sheltersRouter.get('/', checkJwt, (req, res) => {
-    getAllShelters(req)
-    .then(shelters => {
-        // Only support viewing of the animal as application/json
-        const accepts = req.accepts(['application/json']);
-        if (!accepts) {
-            res.status(406).send({ 'Error': 'MIME Type not supported by endpoint' });
-        }
-        else 
+    const jwt = req.header('Authorization'); 
+    const decodedJwt = jwtDecode(jwt);
+    // Only support viewing of the animal as application/json
+    const accepts = req.accepts(['application/json']);
+    if (!accepts) {
+        res.status(406).send({ 'Error': 'MIME Type not supported by endpoint' });
+    }
+    else {
+        getAllShelters(req, decodedJwt['sub'])
+        .then(shelters => {
             res.status(200).json(shelters);
-    })
+        })
+    }   
 })
 
 // GET a shelter based on the id (protected route)
@@ -172,11 +180,12 @@ sheltersRouter.patch('/:shelter_id', checkJwt, function(req, res) {
                         });
                     } 
                     else {
-                        getShelterById(key.id)
-                        .then(shelter => {
-                            const formattedShelter = formatShelters(shelter, req);
-                            res.status(200).json(formattedShelter);
-                        })
+                        res.status(204).end();
+                        // getShelterById(key.id)
+                        // .then(shelter => {
+                        //     const formattedShelter = formatShelters(shelter, req);
+                        //     res.status(200).json(formattedShelter);
+                        // })
                     }
                 })
             }
@@ -214,9 +223,9 @@ sheltersRouter.put('/:shelter_id', checkJwt, (req, res) => {
                 else {
                     getShelterById(key.id)
                     .then(shelter => {
-                        const formattedShelter = formatShelters(shelter, req);
-                        res.status(200).json(formattedShelter);
-                        // res.status(204).end(); 
+                        // const formattedShelter = formatShelters(shelter, req);
+                        // res.status(200).json(formattedShelter);
+                        res.status(204).end(); 
                     })
                 }
             }) 
@@ -233,7 +242,7 @@ sheltersRouter.put('/:shelter_id/animals/:animal_id', checkJwt, (req, res) => {
         if (shelter[0] === undefined || shelter[0] === null)
         {
             res.status(404).json({
-                'Error': 'No shelter with this shelter_id exists'
+                'Error': "The specified shelter or animal doesn't exist."
             }); 
         }
         else if (shelter[0].user !== decodedJwt['sub']) {
@@ -247,7 +256,7 @@ sheltersRouter.put('/:shelter_id/animals/:animal_id', checkJwt, (req, res) => {
                 if (animal[0] === undefined || animal[0] === null)
                 {
                     res.status(404).json({
-                        'Error': 'No animal with this animal_id exists'
+                        'Error': "The specified animal or shelter doesn't exist"
                     }); 
                 }
                 // if both shelter and animal are in db, check if the animal is already in another shelter
@@ -258,11 +267,12 @@ sheltersRouter.put('/:shelter_id/animals/:animal_id', checkJwt, (req, res) => {
                     }); 
                 }
                 else {
-                    assignShelterToAnimal(shelter[0], animal[0]).then(() => {
-                        getShelterById(req.params.shelter_id).then(entity => {
-                            const formattedShelter = formatShelters(entity, req); 
-                            res.status(200).json(formattedShelter);
-                        })
+                    assignShelterToAnimal(shelter[0], animal[0], req).then(() => {
+                        // getShelterById(req.params.shelter_id).then(entity => {
+                        //     const formattedShelter = formatShelters(entity, req); 
+                        //     res.status(200).json(formattedShelter);
+                        // })
+                        res.status(204).end();
                     })
 
                 }
@@ -304,6 +314,7 @@ sheltersRouter.delete('/:shelter_id', checkJwt, (req, res) => {
             }
         }
         else {
+            console.log(req.params.shelter_id);
             deleteShelter(req.params.shelter_id)
             .then(() => {
                 res.status(204).end();
@@ -322,7 +333,7 @@ sheltersRouter.delete('/:shelter_id/animals/:animal_id', checkJwt, (req, res) =>
         if (shelter[0] === undefined || shelter[0] === null)
         {
             res.status(404).json({
-                'Error': 'No shelter with this shelter_id exists'
+                'Error': 'No shelter/animal with this shelter_id/animal_id exists'
             });
         }
         else if (shelter[0].user !== decodedJwt['sub']) {
@@ -337,7 +348,7 @@ sheltersRouter.delete('/:shelter_id/animals/:animal_id', checkJwt, (req, res) =>
                 if (animal[0] === undefined || animal[0] === null)
                 {
                     res.status(404).json({
-                        'Error': 'No animal with this animal_id exists'
+                        'Error': 'No shelter/animal with this shelter_id/animal_id exists'
                     })
                 }
                 // animal and shelter exists, now check to see if the animal is at this shelter

@@ -40,10 +40,10 @@ async function addShelter(req, user)
 }
 
 // Get all shelters (GET)
-async function getAllShelters(req)
+async function getAllShelters(req, user)
 {
     // Limit to 5 results per page
-    var query = datastore.createQuery(SHELTER).limit(5);
+    var query = datastore.createQuery(SHELTER).filter('user', '=', user).limit(5);
     const results = {}; 
     var prev; 
     if (Object.keys(req.query).includes("cursor")) {

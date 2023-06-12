@@ -38,7 +38,7 @@ const {
     removeAnimalFromAdopter: removeAnimalFromAdopter
 } = require('../models/adopters');
 
-const { formatAnimals } = require('../formats');
+const { formatAnimals, addSelfLink } = require('../formats');
 
 const domain = process.env.DOMAIN;
 
@@ -109,8 +109,9 @@ animalsRouter.get('/', checkJwtForUnprotected(), function(req, res) {
     .then( animals => {
         // Only support viewing of the animal as application/json
         const accepts = req.accepts(['application/json']);
+        console.log(accepts);
         if (!accepts) {
-            res.status(406).send({ 'Error': 'MIME Type not supported by endpoint' });
+            res.status(406).send({ 'Error': 'MIME Type is not supported by endpoint' });
         }
         else
             res.status(200).json(animals);
@@ -124,7 +125,7 @@ animalsRouter.get('/:animal_id', checkJwtForUnprotected(), (req, res) => {
         // Only support viewing of the animal as application/json
         const accepts = req.accepts(['application/json']);
         if (!accepts) {
-            res.status(406).send({ 'Error': 'MIME Type not supported by endpoint' });
+            res.status(406).send({ 'Error': 'MIME Type is not supported by endpoint' });
         }
         else if (animal[0] === undefined || animal[0] === null) {
             res.status(404).json({ 'Error': 'No animal with this animal_id is found.' }); 
@@ -187,11 +188,12 @@ animalsRouter.patch('/:animal_id', (req, res) => {
             }
             editAnimal(currAnimal.id, animalName, animalSpecies, animalBreed, animalAge, animalGender, animalColors, animalAdoptable, animalMicrochipped, animalLocation)
             .then(key => {
-                getAnimalById(key.id)
-                .then(animal => {
-                    const editedAnimal = formatAnimals(animal, req);
-                    res.status(200).json(editedAnimal);
-                })
+                res.status(204).end();
+                // getAnimalById(key.id)
+                // .then(animal => {
+                //     const editedAnimal = formatAnimals(animal, req);
+                //     res.status(200).json();
+                // })
             })
         }
     })
@@ -208,11 +210,12 @@ animalsRouter.put('/:animal_id', (req, res) => {
         else {
             editAnimal(req.params.animal_id, req.body.name, req.body.species, req.body.breed,req.body.age, req.body.gender, req.body.colors, req.body.adoptable, req.body.microchipped, animal[0].location)
             .then(key => {
-                getAnimalById(key.id)
-                .then(animal => {
-                    const editedAnimal = formatAnimals(animal, req);
-                    res.status(200).json(editedAnimal);
-                })
+                res.status(204).end();
+                // getAnimalById(key.id)
+                // .then(animal => {
+                //     const editedAnimal = formatAnimals(animal, req);
+                //     res.status(200).json(editedAnimal);
+                // })
             })
         }
     })
@@ -220,24 +223,35 @@ animalsRouter.put('/:animal_id', (req, res) => {
 
 // PUT - assign a shelter to the animal
 animalsRouter.put('/:animal_id/shelters/:shelter_id', (req, res) => {
-    console.log('Entering put MODE');
     getShelterById(req.params.shelter_id)
     .then(shelter => {
         if (shelter[0] === undefined || shelter[0] === null)
         {
-            res.status(404).json({ 'Error': 'The specified shelter does not exist.' }); 
+            res.status(404).json({ 'Error': 'The specified shelter or animal does not exist.' }); 
         }
         else 
         {
             getAnimalById(req.params.animal_id)
             .then(animal => {
-                assignShelterToAnimal(shelter[0], animal[0])
-                .then(key => {
-                    getAnimalById(key.id).then(newAnimal => {
-                        console.log(newAnimal);
-                    const formattedAnimal = formatAnimals(newAnimal, req);
-                    res.status(200).json(formattedAnimal);
+                // if there is already a shelter or adopter assigned
+                if (animal[0].location !== null) 
+                {
+                    res.status(403).json({ 'Error': 'The animal is already in another shelter or with an adopter.' });
+                }
+                else if (animal[0] === undefined || animal[0] === null)
+                {
+                    res.status(404).json({
+                        'Error': "The specified shelter or animal does not exist"
                     })
+                }
+                assignShelterToAnimal(shelter[0], animal[0], req)
+                .then(key => {
+                    res.status(204).end();
+                    // getAnimalById(key.id).then(newAnimal => {
+                    //     console.log(newAnimal);
+                    // const formattedAnimal = formatAnimals(newAnimal, req);
+                    // res.status(200).json(formattedAnimal);
+                    // })
                 });
             })
         }

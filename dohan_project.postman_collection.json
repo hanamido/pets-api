@@ -1,0 +1,3956 @@
+{
+	"info": {
+		"_postman_id": "cd063455-1d49-4cab-bd49-9c1bc652fc10",
+		"name": "portfolio-pet-api",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "25679887"
+	},
+	"item": [
+		{
+			"name": "201 - Add shelter01 for 1st authorized user",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"//Set shelter01-1 environment variable from response",
+							"pm.environment.set(\"shelter01-1_id\", pm.response.json()[\"id\"]);",
+							"console.log(pm.response.json()[\"id\"]);",
+							"pm.environment.set(\"shelter01_owner\", pm.response.json()[\"user\"]);",
+							"const tokenArray = pm.request.getHeaders()[\"Authorization\"].split(\" \");",
+							"const bearer_token = tokenArray[1];",
+							"pm.environment.set(\"jwt1\", bearer_token);",
+							"",
+							"pm.test(\"201 status code\", function () {",
+							"    //Check for 201 status code",
+							"    pm.response.to.have.status(201);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6IktET3ZTb3BOcVROS3V4a1F6M2oycyJ9.eyJuaWNrbmFtZSI6ImljZWNyZWFtIiwibmFtZSI6ImljZWNyZWFtQGdtYWlsLmNvbSIsInBpY3R1cmUiOiJodHRwczovL3MuZ3JhdmF0YXIuY29tL2F2YXRhci9hYjQ2M2VlMGE5OWJmOTAwM2Q0ZTk3N2I5MmY0MGE2ZD9zPTQ4MCZyPXBnJmQ9aHR0cHMlM0ElMkYlMkZjZG4uYXV0aDAuY29tJTJGYXZhdGFycyUyRmljLnBuZyIsInVwZGF0ZWRfYXQiOiIyMDIzLTA2LTExVDE3OjIxOjEyLjIyOVoiLCJlbWFpbCI6ImljZWNyZWFtQGdtYWlsLmNvbSIsImVtYWlsX3ZlcmlmaWVkIjpmYWxzZSwiaXNzIjoiaHR0cHM6Ly9wZXRzLWFwaS51cy5hdXRoMC5jb20vIiwiYXVkIjoiZDNLY0lzYk5raFhIZjhhNUFDY2o1SmwzZ3pWRDlDVnAiLCJpYXQiOjE2ODY1MDQxMDMsImV4cCI6MTY4NjU0MDEwMywic3ViIjoiYXV0aDB8NjQ3YzYwNDEyZGVhMGZlNWJiYzY0ZTI2Iiwic2lkIjoieWlGX0RnOXA3YlBuMHRHNDJBeFZSSkVScHVJeUNxU0UiLCJub25jZSI6Il9ERDZBalV2R1FOa284MW9HRWhBQ3g0NVg1dnczM295djhqbi1WYzNBblEifQ.2vYMR2SXn7B3v58wX__9P5pA_nKOEDOhpirlarZlNtoPA2bX1vDVFPfeNOwQnWzUd3LEhZ4WXONMzjbvFEEU52iTs8cVsninHfg3TcBavr2JQTSXlivnQ_Q_-o-OeMpfUhxE7edUB-682jn670dIjZzM22NpYed1geUdTUIV3TPA8lSqYdaTPwviEkeGX7hFQDIwZITMoZjXY6U-2A-pKA0IIPYXd9v6mfzY94_KIPbcx5fktaDjFVxo8XC0vZaRDgCA7LwAkY-NwqQ9vCJ8SbMRI5zoF7sWTHoIVsWT2lQgCDAh3tc-vMgqYi--6RnxZ00ceLmPSI9j-5pumTGdYg",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"name\": \"San Diego Humane Society\",\n    \"address\": \"5500 Gaines Street, San Diego, CA 92110\",\n    \"contact\": {\n        \"email\": \"info@sdhumane.org\",\n        \"phone_number\": \"(619) 299-7012\"\n    }\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{app_url}}/shelters",
+					"host": [
+						"{{app_url}}"
+					],
+					"path": [
+						"shelters"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "201 - Add shelter02 for 1st authorized user",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"//Set shelter01-2_id environment variable from response",
+							"pm.environment.set(\"shelter01-2_id\", pm.response.json()[\"id\"]);",
+							"console.log(pm.response.json()[\"id\"]);",
+							"",
+							"pm.test(\"201 status code\", function () {",
+							"    //Check for 201 status code",
+							"    pm.response.to.have.status(201);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{jwt1}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"name\": \"NPB Animal Shelter\",\n    \"address\": \"20302 Riverside Dr, Newport Beach, CA 92620\",\n    \"contact\": {\n      \"email\": \"info@fonbas.org\",\n      \"phone_number\": \"(949) 718-3255\"\n    },\n    \"website\": \"https://fonbas.com/\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{app_url}}/shelters",
+					"host": [
+						"{{app_url}}"
+					],
+					"path": [
+						"shelters"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "201 - Add shelter03 for 1st authorized user",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"//Set shelter01-2_id environment variable from response",
+							"pm.environment.set(\"shelter01-3_id\", pm.response.json()[\"id\"]);",
+							"console.log(pm.response.json()[\"id\"]);",
+							"",
+							"pm.test(\"201 status code\", function () {",
+							"    //Check for 201 status code",
+							"    pm.response.to.have.status(201);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{jwt1}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"name\": \"Helen Woodward Animal Center\",\n    \"address\": \"6461 El Apajo Road, Rancho Santa Fe, CA 92067\",\n    \"contact\": {\n      \"email\": null,\n      \"phone_number\": \"858-756-4117 ext. 300\"\n    }\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{app_url}}/shelters",
+					"host": [
+						"{{app_url}}"
+					],
+					"path": [
+						"shelters"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "201 - Add shelter04 for 1st authorized user",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"//Set shelter01-2_id environment variable from response",
+							"pm.environment.set(\"shelter01-4_id\", pm.response.json()[\"id\"]);",
+							"console.log(pm.response.json()[\"id\"]);",
+							"",
+							"pm.test(\"201 status code\", function () {",
+							"    //Check for 201 status code",
+							"    pm.response.to.have.status(201);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{jwt1}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"name\": \"Mission Viejo Animal Services Center\",\n    \"address\": \"28095 Hillcrest, Mission Viejo, CA 92692\",\n    \"contact\": {\n      \"email\": \"unknown\",\n      \"phone_number\": \"(949) 470-3045\"\n    },\n    \"website\": \"https://cityofmissionviejo.org/departments/animal-services\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{app_url}}/shelters",
+					"host": [
+						"{{app_url}}"
+					],
+					"path": [
+						"shelters"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "201 - Add shelter05 for 1st authorized user",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"//Set shelter01-2_id environment variable from response",
+							"pm.environment.set(\"shelter01-5_id\", pm.response.json()[\"id\"]);",
+							"console.log(pm.response.json()[\"id\"]);",
+							"",
+							"pm.test(\"201 status code\", function () {",
+							"    //Check for 201 status code",
+							"    pm.response.to.have.status(201);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{jwt1}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"name\": \"South LA Animal Shelter\",\n    \"address\": \"1850 W 60th St, Los Angeles, CA 90047\",\n    \"contact\": {\n      \"email\": \"unknown\",\n      \"phone_number\": \"(888) 452-7381\"\n    },\n    \"website\": \"https://www.laanimalservices.com/\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{app_url}}/shelters",
+					"host": [
+						"{{app_url}}"
+					],
+					"path": [
+						"shelters"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "201 - Add shelter06 for 1st authorized user",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"//Set shelter01-2_id environment variable from response",
+							"pm.environment.set(\"shelter01-6_id\", pm.response.json()[\"id\"]);",
+							"console.log(pm.response.json()[\"id\"]);",
+							"",
+							"pm.test(\"201 status code\", function () {",
+							"    //Check for 201 status code",
+							"    pm.response.to.have.status(201);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{jwt1}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"name\": \"North Central Animal Shelter\",\n    \"address\": \"3201 Lacy St, Los Angeles, CA 90031\",\n    \"contact\": {\n      \"email\": \"info@fonbas.org\",\n      \"phone_number\": \"(888) 452-7381\"\n    },\n    \"website\": \"http://www.laanimalservices.com/shelters/\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{app_url}}/shelters",
+					"host": [
+						"{{app_url}}"
+					],
+					"path": [
+						"shelters"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "201 - Add shelter01 for 2nd authorized user",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"//Set shelter02-1_id environment variable from response",
+							"pm.environment.set(\"shelter02-1_id\", pm.response.json()[\"id\"]);",
+							"console.log(pm.response.json()[\"id\"]);",
+							"pm.environment.set(\"shelter02_owner\", pm.response.json()[\"user\"]);",
+							"const tokenArray = pm.request.getHeaders()[\"Authorization\"].split(\" \");",
+							"const bearer_token = tokenArray[1];",
+							"pm.environment.set(\"jwt2\", bearer_token);",
+							"",
+							"pm.test(\"201 status code\", function () {",
+							"    //Check for 201 status code",
+							"    pm.response.to.have.status(201);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6IktET3ZTb3BOcVROS3V4a1F6M2oycyJ9.eyJuaWNrbmFtZSI6ImJvYmEiLCJuYW1lIjoiYm9iYUBtaWxrdGVhLmNvbSIsInBpY3R1cmUiOiJodHRwczovL3MuZ3JhdmF0YXIuY29tL2F2YXRhci8wMGU4YWZhMzE5YTNjODM1ZmZkZmVjZDI4Y2VjMTI4Zj9zPTQ4MCZyPXBnJmQ9aHR0cHMlM0ElMkYlMkZjZG4uYXV0aDAuY29tJTJGYXZhdGFycyUyRmJvLnBuZyIsInVwZGF0ZWRfYXQiOiIyMDIzLTA2LTExVDA5OjU3OjMyLjQ2MloiLCJlbWFpbCI6ImJvYmFAbWlsa3RlYS5jb20iLCJlbWFpbF92ZXJpZmllZCI6ZmFsc2UsImlzcyI6Imh0dHBzOi8vcGV0cy1hcGkudXMuYXV0aDAuY29tLyIsImF1ZCI6ImQzS2NJc2JOa2hYSGY4YTVBQ2NqNUpsM2d6VkQ5Q1ZwIiwiaWF0IjoxNjg2NTA0MTgzLCJleHAiOjE2ODY1NDAxODMsInN1YiI6ImF1dGgwfDY0N2M2YzE5ZjBjNGFkYzg4OTU5YmUzMyIsInNpZCI6IlV5LXduYV9pWWZNQWQtSzNETUhHWnQ5V2R2aW9PQmVvIiwibm9uY2UiOiIydmhXSWZfTGZFYk9fd1QxWUtfaWFIWWhKUzVBYzRiSFpORVJXQnVZS093In0.KVRKsvGullqADVGJK3Q2ojkrcgsp29WJZviMeWk7oEn_e1rStiipDBvIz9hRYVJbVM6pOZNqDGUqf3wPYeBLlIXS5-POyFEnm2MVtentKbaA_n84eloopxLCpRuJDq4rmU9pf3Igj-TOHZRiWuMbKI0kzVVXfrwCy2NVHQVfIexhQexptba61muqw0SH-oFnSy0bs-Gmf_N184Su23nqV3O44lDmFkDcODisPNCbIJbOmuynIr0rQtrJvpjkkTgVUlFlBpcUpuqvk6DPVZuRVk7SOCWQEqo09KCcU_EF8i1hSwSGoiTFSj5xTR9liUQ3zufdfCCAjPE_QFfG0fnMzA",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"name\": \"Orange County Humane Society\",\n    \"address\": \"21632 Newland St, Huntington Beach, CA 92646\",\n    \"contact\": {\n      \"phone_number\": \"(714) 536-8480\",\n      \"email\": \"unknown\"\n    },\n    \"website\": \"https://www.ochumanesociety.com/\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{app_url}}/shelters",
+					"host": [
+						"{{app_url}}"
+					],
+					"path": [
+						"shelters"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "201 - Add animal01 (unprotected)",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"//Set animal id environment variable from response",
+							"pm.environment.set(\"animal01_id\", pm.response.json()[\"id\"]);",
+							"console.log(pm.response.json()[\"id\"]);",
+							"",
+							"pm.test(\"201 status code\", function () {",
+							"    //Check for 201 status code",
+							"    pm.response.to.have.status(201);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"name\": \"Creamsicle\",\n    \"species\": \"cat\",\n    \"breed\": \"domestic shorthair\",\n    \"age\": 3,\n    \"gender\": \"male\",\n    \"colors\": [\"orange\", \"white\"],\n    \"adoptable\": true,\n    \"microchipped\": false\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{app_url}}/animals",
+					"host": [
+						"{{app_url}}"
+					],
+					"path": [
+						"animals"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "201 - Add animal02 (unprotected)",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"//Set animal id environment variable from response",
+							"pm.environment.set(\"animal02_id\", pm.response.json()[\"id\"]);",
+							"console.log(pm.response.json()[\"id\"]);",
+							"",
+							"pm.test(\"201 status code\", function () {",
+							"    //Check for 201 status code",
+							"    pm.response.to.have.status(201);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"name\": \"Oreo\",\n    \"species\": \"cat\",\n    \"breed\": \"domestic shorthair\",\n    \"age\": 2,\n    \"gender\": \"male\",\n    \"colors\": [\"black\", \"white\"],\n    \"adoptable\": true,\n    \"microchipped\": false\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{app_url}}/animals",
+					"host": [
+						"{{app_url}}"
+					],
+					"path": [
+						"animals"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "201 - Add animal03 (unprotected)",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"//Set animal id environment variable from response",
+							"pm.environment.set(\"animal03_id\", pm.response.json()[\"id\"]);",
+							"console.log(pm.response.json()[\"id\"]);",
+							"",
+							"pm.test(\"201 status code\", function () {",
+							"    //Check for 201 status code",
+							"    pm.response.to.have.status(201);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"name\": \"Eddie\",\n    \"species\": \"cat\",\n    \"breed\": \"domestic shorthair\",\n    \"age\": 3,\n    \"gender\": \"male\",\n    \"colors\": [\"black\"],\n    \"adoptable\": true,\n    \"microchipped\": false\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{app_url}}/animals",
+					"host": [
+						"{{app_url}}"
+					],
+					"path": [
+						"animals"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "201 - Add animal04 (unprotected)",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"//Set animal id environment variable from response",
+							"pm.environment.set(\"animal04_id\", pm.response.json()[\"id\"]);",
+							"console.log(pm.response.json()[\"id\"]);",
+							"",
+							"pm.test(\"201 status code\", function () {",
+							"    //Check for 201 status code",
+							"    pm.response.to.have.status(201);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"name\": \"Kami\",\n    \"species\": \"dog\",\n    \"breed\": \"husky\",\n    \"age\": 3,\n    \"gender\": \"male\",\n    \"colors\": [\"black\", \"white\"],\n    \"adoptable\": true,\n    \"microchipped\": true\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{app_url}}/animals",
+					"host": [
+						"{{app_url}}"
+					],
+					"path": [
+						"animals"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "201 - Add animal05 (unprotected)",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"//Set animal id environment variable from response",
+							"pm.environment.set(\"animal05_id\", pm.response.json()[\"id\"]);",
+							"console.log(pm.response.json()[\"id\"]);",
+							"",
+							"pm.test(\"201 status code\", function () {",
+							"    //Check for 201 status code",
+							"    pm.response.to.have.status(201);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"name\": \"Mr. Grumpypants\",\n    \"species\": \"cat\",\n    \"breed\": \"domestic shorthair\",\n    \"age\": 5,\n    \"gender\": \"male\",\n    \"colors\": [\"gray\"],\n    \"adoptable\": false,\n    \"microchipped\": false\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{app_url}}/animals",
+					"host": [
+						"{{app_url}}"
+					],
+					"path": [
+						"animals"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "201 - Add animal06 (unprotected)",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"//Set animal id environment variable from response",
+							"pm.environment.set(\"animal06_id\", pm.response.json()[\"id\"]);",
+							"console.log(pm.response.json()[\"id\"]);",
+							"",
+							"pm.test(\"201 status code\", function () {",
+							"    //Check for 201 status code",
+							"    pm.response.to.have.status(201);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"name\": \"Tiramisu\",\n    \"species\": \"cat\",\n    \"breed\": \"domestic shorthair\",\n    \"age\": 3,\n    \"gender\": \"female\",\n    \"colors\": [\"calico\"],\n    \"adoptable\": true,\n    \"microchipped\": false\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{app_url}}/animals",
+					"host": [
+						"{{app_url}}"
+					],
+					"path": [
+						"animals"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "201 - Add adopter01 for 1st authorized user",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"//Set adopter01-1 environment variable from response",
+							"pm.environment.set(\"adopter01-1_id\", pm.response.json()[\"id\"]);",
+							"console.log(pm.response.json()[\"id\"]);",
+							"pm.environment.set(\"adopter01_owner\", pm.response.json()[\"user\"]);",
+							"",
+							"pm.test(\"201 status code\", function () {",
+							"    //Check for 201 status code",
+							"    pm.response.to.have.status(201);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{jwt1}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"name\": \"Judy Hopps\",\n    \"email\": \"policerabbit@zootopia.com\",\n    \"phone_number\": \"(123) 456-7890\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{app_url}}/adopters",
+					"host": [
+						"{{app_url}}"
+					],
+					"path": [
+						"adopters"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Add adopter02 for 1st authorized user",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"//Set adopter01-2 environment variable from response",
+							"pm.environment.set(\"adopter01-2_id\", pm.response.json()[\"id\"]);",
+							"console.log(pm.response.json()[\"id\"]);",
+							"pm.environment.set(\"adopter01_owner\", pm.response.json()[\"user\"]);",
+							"",
+							"pm.test(\"201 status code\", function () {",
+							"    //Check for 201 status code",
+							"    pm.response.to.have.status(201);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{jwt1}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"name\": \"Izuku Midoriya\",\n    \"email\": \"imidoriya@uahigh.org\",\n    \"phone_number\": \"(949) 456-1235\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{app_url}}/adopters",
+					"host": [
+						"{{app_url}}"
+					],
+					"path": [
+						"adopters"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Add adopter01 for 2nd authorized user",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"//Set adopter02-1 environment variable from response",
+							"pm.environment.set(\"adopter02-1_id\", pm.response.json()[\"id\"]);",
+							"console.log(pm.response.json()[\"id\"]);",
+							"pm.environment.set(\"adopter02_owner\", pm.response.json()[\"user\"]);",
+							"",
+							"pm.test(\"201 status code\", function () {",
+							"    //Check for 201 status code",
+							"    pm.response.to.have.status(201);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{jwt2}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"name\": \"Alphonse Elric\",\n    \"email\": \"aelric@gmail.com\",\n    \"phone_number\": \"(714) 123-3245\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{app_url}}/adopters",
+					"host": [
+						"{{app_url}}"
+					],
+					"path": [
+						"adopters"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "401 - Add a shelter with invalid JWT",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test('401 status code', function() {",
+							"    // check for 401 status code",
+							"    pm.response.to.have.status(401);",
+							"})"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "wrongbearertoken",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"name\": \"San Diego Humane Society\",\n    \"address\": \"5500 Gaines Street, San Diego, CA 92110\",\n    \"contact\": {\n        \"email\": \"info@sdhumane.org\",\n        \"phone_number\": \"(619) 299-7012\"\n    }\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{app_url}}/shelters",
+					"host": [
+						"{{app_url}}"
+					],
+					"path": [
+						"shelters"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "401 - Add a shelter with missing JWT",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test('401 status code', function() {",
+							"    // check for 401 status code",
+							"    pm.response.to.have.status(401);",
+							"})"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"name\": \"San Diego Humane Society\",\n    \"address\": \"5500 Gaines Street, San Diego, CA 92110\",\n    \"contact\": {\n        \"email\": \"info@sdhumane.org\",\n        \"phone_number\": \"(619) 299-7012\"\n    }\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{app_url}}/shelters",
+					"host": [
+						"{{app_url}}"
+					],
+					"path": [
+						"shelters"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Add an adopter with invalid/missing JWT",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test('401 status code', function() {",
+							"    // check for 401 status code",
+							"    pm.response.to.have.status(401);",
+							"})"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "wrongbearertoken",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"name\": \"Tsuyu Asui\",\n    \"contact\": {\n        \"email\": \"tasui@uahigh.org\",\n        \"phone_number\": \"456-123-2355\"\n    }\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{app_url}}/adopters",
+					"host": [
+						"{{app_url}}"
+					],
+					"path": [
+						"adopters"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Add an animal with a missing required attribute",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test('401 status code', function() {",
+							"    // check for 401 status code",
+							"    pm.response.to.have.status(400);",
+							"})"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"name\": \"Sesame\",\n    \"species\": \"dog\",\n    \"breed\": \"husky\",\n    \"colors\": [\"white\", \"black\"],\n    \"adoptable\": true,\n    \"microchipped\": true\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{app_url}}/animals",
+					"host": [
+						"{{app_url}}"
+					],
+					"path": [
+						"animals"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "200 - Get all shelters for 1st authorized user (and check for pagination)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test('200 status code', function() {",
+							"    // check for 200 status code",
+							"    pm.response.to.have.status(200);",
+							"})",
+							"",
+							"function checkOwner() {",
+							"    const ownerToCheck = pm.environment.get(\"shelter01_owner\");",
+							"    let i;",
+							"    const response = pm.response.json(); ",
+							"    console.log(response);",
+							"    for (let i = 0; i < response.length; i++) {",
+							"        if (response[i].user !== ownerToCheck) {",
+							"            console.log('recheck owner');",
+							"            return false;",
+							"        }",
+							"    }",
+							"    return true;",
+							"}",
+							"",
+							"function checkPagination() {",
+							"    const responseData = pm.response.json();",
+							"    console.log(responseData.next);",
+							"    if (responseData.next !== undefined)",
+							"    {",
+							"        return true;",
+							"    }",
+							"    return false;",
+							"}",
+							"",
+							"pm.test(\"pagination exists\", function () {",
+							"    // Check that pagination exists",
+							"    pm.expect(checkPagination()).to.eq(true);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{jwt1}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{app_url}}/shelters",
+					"host": [
+						"{{app_url}}"
+					],
+					"path": [
+						"shelters"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "200 - Get all animals (with check for pagination)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test('200 status code', function() {",
+							"    // check for 200 status code",
+							"    pm.response.to.have.status(200);",
+							"})",
+							"",
+							"function checkPagination() {",
+							"    const responseData = pm.response.json();",
+							"    console.log(responseData.next);",
+							"    if (responseData.next !== undefined)",
+							"    {",
+							"        return true;",
+							"    }",
+							"    return false;",
+							"}",
+							"",
+							"pm.test(\"pagination exists\", function () {",
+							"    // Check that pagination exists",
+							"    pm.expect(checkPagination()).to.eq(true);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{app_url}}/animals",
+					"host": [
+						"{{app_url}}"
+					],
+					"path": [
+						"animals"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "200 - Get all users",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test('200 status code', function() {",
+							"    // check for 200 status code",
+							"    pm.response.to.have.status(200);",
+							"})"
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{app_url}}/users",
+					"host": [
+						"{{app_url}}"
+					],
+					"path": [
+						"users"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get the shelters for 2nd authorized user",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test('200 status code', function() {",
+							"    // check for 200 status code",
+							"    pm.response.to.have.status(200);",
+							"})",
+							"",
+							"function checkOwner() {",
+							"    const ownerToCheck = pm.environment.get(\"shelter02_owner\");",
+							"    let i;",
+							"    const response = pm.response.json(); ",
+							"    console.log(response);",
+							"    for (i = 0; i < response.length; i++) {",
+							"        if (response[i].user !== ownerToCheck) {",
+							"            console.log('recheck owner');",
+							"            return false;",
+							"        }",
+							"    }",
+							"    return true;",
+							"}",
+							"",
+							"pm.test(\"content is valid\", function () {",
+							"    //Check for appropriate content with sub",
+							"    pm.expect(checkOwner()).to.eq(true);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{jwt2}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{app_url}}/shelters",
+					"host": [
+						"{{app_url}}"
+					],
+					"path": [
+						"shelters"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get the adopters for the 1st authorized user",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test('200 status code', function() {",
+							"    // check for 200 status code",
+							"    pm.response.to.have.status(200);",
+							"})",
+							"",
+							"function checkOwner() {",
+							"    const ownerToCheck = pm.environment.get(\"adopter01_owner\");",
+							"    let i;",
+							"    const response = pm.response.json(); ",
+							"    console.log(response);",
+							"    for (i = 0; i < response.length; i++) {",
+							"        if (response[i].user !== ownerToCheck) {",
+							"            console.log('recheck owner');",
+							"            return false;",
+							"        }",
+							"    }",
+							"    return true;",
+							"}",
+							"",
+							"pm.test(\"content is valid\", function () {",
+							"    //Check for appropriate content with sub",
+							"    pm.expect(checkOwner()).to.eq(true);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{jwt1}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{app_url}}/adopters",
+					"host": [
+						"{{app_url}}"
+					],
+					"path": [
+						"adopters"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get the adopters for the 2nd authorized user",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test('200 status code', function() {",
+							"    // check for 200 status code",
+							"    pm.response.to.have.status(200);",
+							"})",
+							"",
+							"function checkOwner() {",
+							"    const ownerToCheck = pm.environment.get(\"adopter02_owner\");",
+							"    let i;",
+							"    const response = pm.response.json(); ",
+							"    console.log(response);",
+							"    for (i = 0; i < response.length; i++) {",
+							"        if (response[i].user !== ownerToCheck) {",
+							"            console.log('recheck owner');",
+							"            return false;",
+							"        }",
+							"    }",
+							"    return true;",
+							"}",
+							"",
+							"pm.test(\"content is valid\", function () {",
+							"    //Check for appropriate content with sub",
+							"    pm.expect(checkOwner()).to.eq(true);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{jwt1}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{app_url}}/adopters",
+					"host": [
+						"{{app_url}}"
+					],
+					"path": [
+						"adopters"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "401 - Get all shelters with missing/incorrect JWT",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test('401 status code', function() {",
+							"    // check for status code",
+							"    pm.response.to.have.status(401);",
+							"})",
+							"",
+							"function checkOwner() {",
+							"    const ownerToCheck = pm.environment.get(\"shelter01_owner\");",
+							"    let i;",
+							"    const response = pm.response.json(); ",
+							"    console.log(response);",
+							"    for (i = 0; i < response.length; i++) {",
+							"        if (response[i].owner !== ownerToCheck) {",
+							"            console.log('recheck owner');",
+							"            return false;",
+							"        }",
+							"    }",
+							"    return true;",
+							"}",
+							"",
+							"pm.test(\"content is valid\", function () {",
+							"    //Check for appropriate content with sub",
+							"    pm.expect(checkOwner()).to.eq(true);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{app_url}}/shelters",
+					"host": [
+						"{{app_url}}"
+					],
+					"path": [
+						"shelters"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "401 - Get all adopters with missing/invalid JWT",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test('401 status code', function() {",
+							"    // check for 401 status code",
+							"    pm.response.to.have.status(401);",
+							"})",
+							"",
+							"function checkOwner() {",
+							"    const ownerToCheck = pm.environment.get(\"shelter01_owner\");",
+							"    let i;",
+							"    const response = pm.response.json(); ",
+							"    console.log(response);",
+							"    for (i = 0; i < response.length; i++) {",
+							"        if (response[i].owner !== ownerToCheck) {",
+							"            console.log('recheck owner');",
+							"            return false;",
+							"        }",
+							"    }",
+							"    return true;",
+							"}",
+							"",
+							"pm.test(\"content is valid\", function () {",
+							"    //Check for appropriate content with sub",
+							"    pm.expect(checkOwner()).to.eq(true);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{app_url}}/shelters",
+					"host": [
+						"{{app_url}}"
+					],
+					"path": [
+						"shelters"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get a specific shelter with the correct JWT",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test('200 status code', function() {",
+							"    // check for 200 status code",
+							"    pm.response.to.have.status(200);",
+							"})",
+							"",
+							"function checkOwner() {",
+							"    const ownerToCheck = pm.environment.get(\"shelters01-1_id\");",
+							"    let i;",
+							"    const response = pm.response.json(); ",
+							"    console.log(response);",
+							"    for (i = 0; i < response.length; i++) {",
+							"        if (response[i].user !== ownerToCheck) {",
+							"            console.log('recheck owner');",
+							"            return false;",
+							"        }",
+							"    }",
+							"    return true;",
+							"}",
+							"",
+							"pm.test(\"content is valid\", function () {",
+							"    //Check for appropriate content with sub",
+							"    pm.expect(checkOwner()).to.eq(true);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{jwt1}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{app_url}}/shelters/{{shelter01-1_id}}",
+					"host": [
+						"{{app_url}}"
+					],
+					"path": [
+						"shelters",
+						"{{shelter01-1_id}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get a specific adopter with the correct JWT",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test('200 status code', function() {",
+							"    // check for 200 status code",
+							"    pm.response.to.have.status(200);",
+							"})",
+							"",
+							"function checkOwner() {",
+							"    const ownerToCheck = pm.environment.get(\"adopter01-1_id\");",
+							"    let i;",
+							"    const response = pm.response.json(); ",
+							"    console.log(response);",
+							"    for (i = 0; i < response.length; i++) {",
+							"        if (response[i].user !== ownerToCheck) {",
+							"            console.log('recheck owner');",
+							"            return false;",
+							"        }",
+							"    }",
+							"    return true;",
+							"}",
+							"",
+							"pm.test(\"content is valid\", function () {",
+							"    //Check for appropriate content with sub",
+							"    pm.expect(checkOwner()).to.eq(true);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{jwt1}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{app_url}}/adopters/{{adopter01-1_id}}",
+					"host": [
+						"{{app_url}}"
+					],
+					"path": [
+						"adopters",
+						"{{adopter01-1_id}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get a specific animal",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test('200 status code', function() {",
+							"    // check for 200 status code",
+							"    pm.response.to.have.status(200);",
+							"})"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{app_url}}/animals/{{animal01_id}}",
+					"host": [
+						"{{app_url}}"
+					],
+					"path": [
+						"animals",
+						"{{animal01_id}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get a specific animal with the wrong id",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test('404 status code', function() {",
+							"    // check for 404 status code",
+							"    pm.response.to.have.status(404);",
+							"})"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{jwt1}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{app_url}}/adopters/{{wrong_id}}",
+					"host": [
+						"{{app_url}}"
+					],
+					"path": [
+						"adopters",
+						"{{wrong_id}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "403 - Get specific shelter with the wrong JWT (exists but does not own the shelter)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test('403 status code', function() {",
+							"    // check for 403 status code",
+							"    pm.response.to.have.status(403);",
+							"})"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{jwt2}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{app_url}}/shelters/{{shelter01-1_id}}",
+					"host": [
+						"{{app_url}}"
+					],
+					"path": [
+						"shelters",
+						"{{shelter01-1_id}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "403 - Get a specific adopter with a wrong JWT (exists but does not own the adopter)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test('403 status code', function() {",
+							"    // check for 403 status code",
+							"    pm.response.to.have.status(403);",
+							"})"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{jwt2}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{app_url}}/adopters/{{adopter01-1_id}}",
+					"host": [
+						"{{app_url}}"
+					],
+					"path": [
+						"adopters",
+						"{{adopter01-1_id}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "401 - Get specific shelter with missing/invalid JWT",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test('401 status code', function() {",
+							"    // check for status code",
+							"    pm.response.to.have.status(401);",
+							"})"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "invalidtoken",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{app_url}}/boats/",
+					"host": [
+						"{{app_url}}"
+					],
+					"path": [
+						"boats",
+						""
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "401 - Get specific adopter with missing/invalid JWT",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test('401 status code', function() {",
+							"    // check for status code",
+							"    pm.response.to.have.status(401);",
+							"})"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "invalidtoken",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{app_url}}/adopters/{{adopter01-1_id}}",
+					"host": [
+						"{{app_url}}"
+					],
+					"path": [
+						"adopters",
+						"{{adopter01-1_id}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "200 - Editing a shelter (PATCH)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test('200 status code', function() {",
+							"    // check for 200 status code",
+							"    pm.response.to.have.status(200);",
+							"})"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{jwt1}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "PATCH",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"website\": \"https://www.sdhumane.org/\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{app_url}}/shelters/{{shelter01-1_id}}",
+					"host": [
+						"{{app_url}}"
+					],
+					"path": [
+						"shelters",
+						"{{shelter01-1_id}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "200 - Editing a shelter (PUT)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test('200 status code', function() {",
+							"    // check for 200 status code",
+							"    pm.response.to.have.status(200);",
+							"})"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{jwt1}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"name\": \"Newport Beach Animal Shelter\",\n    \"address\": \"20302 Riverside Dr, Newport Beach, CA 92660\",\n    \"contact\": {\n      \"email\": \"info@fonbas.org\",\n      \"phone_number\": \"(949) 718-3454\"\n    },\n    \"website\": \"https://fonbas.org/\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{app_url}}/shelters/{{shelter01-2_id}}",
+					"host": [
+						"{{app_url}}"
+					],
+					"path": [
+						"shelters",
+						"{{shelter01-2_id}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "403 - Editing a shelter that belongs to a different JWT",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test('403 status code', function() {",
+							"    // check for 403 status code",
+							"    pm.response.to.have.status(403);",
+							"})"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{jwt2}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "PATCH",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"website\": \"https://www.sdhumane.org/\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{app_url}}/shelters/{{shelter01-1_id}}",
+					"host": [
+						"{{app_url}}"
+					],
+					"path": [
+						"shelters",
+						"{{shelter01-1_id}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "200 - Add an animal to the shelter",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test('200 status code', function() {",
+							"    // check for 200 status code",
+							"    pm.response.to.have.status(200);",
+							"})"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{jwt1}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"name\": \"Newport Beach Animal Shelter\",\n    \"address\": \"20302 Riverside Dr, Newport Beach, CA 92660\",\n    \"contact\": {\n      \"email\": \"info@fonbas.org\",\n      \"phone_number\": \"(949) 718-3454\"\n    },\n    \"website\": \"https://fonbas.org/\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{app_url}}/shelters/{{shelter01-1_id}}/animals/{{animal01_id}}",
+					"host": [
+						"{{app_url}}"
+					],
+					"path": [
+						"shelters",
+						"{{shelter01-1_id}}",
+						"animals",
+						"{{animal01_id}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "403 - Remove an animal from the shelter with existing but incorrect JWT",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test('403 status code', function() {",
+							"    // check for 403 status code",
+							"    pm.response.to.have.status(403);",
+							"})"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{jwt2}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "DELETE",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"name\": \"Newport Beach Animal Shelter\",\n    \"address\": \"20302 Riverside Dr, Newport Beach, CA 92660\",\n    \"contact\": {\n      \"email\": \"info@fonbas.org\",\n      \"phone_number\": \"(949) 718-3454\"\n    },\n    \"website\": \"https://fonbas.org/\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{app_url}}/shelters/{{shelter01-1_id}}/animals/{{animal01_id}}",
+					"host": [
+						"{{app_url}}"
+					],
+					"path": [
+						"shelters",
+						"{{shelter01-1_id}}",
+						"animals",
+						"{{animal01_id}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "401 - Remove an animal from the shelter with missing/invalid jwt",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test('401 status code', function() {",
+							"    // check for status code",
+							"    pm.response.to.have.status(401);",
+							"})"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "DELETE",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"name\": \"Newport Beach Animal Shelter\",\n    \"address\": \"20302 Riverside Dr, Newport Beach, CA 92660\",\n    \"contact\": {\n      \"email\": \"info@fonbas.org\",\n      \"phone_number\": \"(949) 718-3454\"\n    },\n    \"website\": \"https://fonbas.org/\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{app_url}}/shelters/{{shelter01-1_id}}/animals/{{animal01_id}}",
+					"host": [
+						"{{app_url}}"
+					],
+					"path": [
+						"shelters",
+						"{{shelter01-1_id}}",
+						"animals",
+						"{{animal01_id}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "204 - Remove an animal from the shelter",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test('204 status code', function() {",
+							"    // check for 204 status code",
+							"    pm.response.to.have.status(204);",
+							"})"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{jwt1}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "DELETE",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"name\": \"Newport Beach Animal Shelter\",\n    \"address\": \"20302 Riverside Dr, Newport Beach, CA 92660\",\n    \"contact\": {\n      \"email\": \"info@fonbas.org\",\n      \"phone_number\": \"(949) 718-3454\"\n    },\n    \"website\": \"https://fonbas.org/\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{app_url}}/shelters/{{shelter01-1_id}}/animals/{{animal01_id}}",
+					"host": [
+						"{{app_url}}"
+					],
+					"path": [
+						"shelters",
+						"{{shelter01-1_id}}",
+						"animals",
+						"{{animal01_id}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "403 - Editing a shelter that belongs to a different user (incorrect JWT)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test('403 status code', function() {",
+							"    // check for 403 status code",
+							"    pm.response.to.have.status(403);",
+							"})"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{jwt2}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"website\": \"www.sdhumane.org/\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{app_url}}/shelters/{{shelter01-1_id}}",
+					"host": [
+						"{{app_url}}"
+					],
+					"path": [
+						"shelters",
+						"{{shelter01-1_id}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "401 - Editing a shelter with missing/invalid JWT",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test('401 status code', function() {",
+							"    // check for status code",
+							"    pm.response.to.have.status(401);",
+							"})"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "PATCH",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"website\": \"https://www.sdhumane.org/\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{app_url}}/shelters/{{shelter01-1_id}}",
+					"host": [
+						"{{app_url}}"
+					],
+					"path": [
+						"shelters",
+						"{{shelter01-1_id}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "200 - Editing an animal (PATCH)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test('200 status code', function() {",
+							"    // check for 200 status code",
+							"    pm.response.to.have.status(200);",
+							"})"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "PATCH",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"age\": 2,\n    \"microchipped\": true\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{app_url}}/animals/{{animal01_id}}",
+					"host": [
+						"{{app_url}}"
+					],
+					"path": [
+						"animals",
+						"{{animal01_id}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "200 - Editing an animal (PUT)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test('200 status code', function() {",
+							"    // check for 200 status code",
+							"    pm.response.to.have.status(200);",
+							"})"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{jwt1}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"name\": \"Oreo\",\n    \"species\": \"cat\",\n    \"breed\": \"domestic shorthair\",\n    \"age\": 4,\n    \"gender\": \"male\",\n    \"colors\": [\"white\", \"black\"],\n    \"adoptable\": true,\n    \"microchipped\": false\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{app_url}}/animals/{{animal02_id}}",
+					"host": [
+						"{{app_url}}"
+					],
+					"path": [
+						"animals",
+						"{{animal02_id}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "200 - Editing an adopter (PATCH)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test('200 status code', function() {",
+							"    // check for 200 status code",
+							"    pm.response.to.have.status(200);",
+							"})"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{jwt1}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "PATCH",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"email\": \"policebunny@zootopia.com\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{app_url}}/adopters/{{adopter01-1_id}}",
+					"host": [
+						"{{app_url}}"
+					],
+					"path": [
+						"adopters",
+						"{{adopter01-1_id}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "200 - Editing an adopter (PUT)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test('200 status code', function() {",
+							"    // check for 200 status code",
+							"    pm.response.to.have.status(200);",
+							"})"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{jwt1}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"name\": \"Luna Sailormoon\",\n    \"email\": \"lunanight@sailorscouts.com\",\n    \"phone_number\": \"(123) 234-1567\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{app_url}}/adopters/{{adopter01-2_id}}",
+					"host": [
+						"{{app_url}}"
+					],
+					"path": [
+						"adopters",
+						"{{adopter01-2_id}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "401 - Editing an adopter with missing/invalid JWT",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test('401 status code', function() {",
+							"    // check for status code",
+							"    pm.response.to.have.status(401);",
+							"})"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "PATCH",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"email\": \"policebunny@zooholic.com\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{app_url}}/adopters/{{adopter01-1_id}}",
+					"host": [
+						"{{app_url}}"
+					],
+					"path": [
+						"adopters",
+						"{{adopter01-1_id}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "403 - Editing an adopter with adopter_id belonging to different user",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test('403 status code', function() {",
+							"    // check for status code",
+							"    pm.response.to.have.status(403);",
+							"})"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{jwt2}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"name\": \"Luna Sailormoon\",\n    \"email\": \"lunanight@sailorscouts.com\",\n    \"phone_number\": \"(123) 234-1567\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{app_url}}/adopters/{{adopter01-2_id}}",
+					"host": [
+						"{{app_url}}"
+					],
+					"path": [
+						"adopters",
+						"{{adopter01-2_id}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "200 - Adding an animal to an adopter",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test('200 status code', function() {",
+							"    // check for status code",
+							"    pm.response.to.have.status(200);",
+							"})"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{jwt1}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"name\": \"Luna Sailormoon\",\n    \"email\": \"lunanight@sailorscouts.com\",\n    \"phone_number\": \"(123) 234-1567\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{app_url}}/adopters/{{adopter01-1_id}}/animals/{{animal01_id}}",
+					"host": [
+						"{{app_url}}"
+					],
+					"path": [
+						"adopters",
+						"{{adopter01-1_id}}",
+						"animals",
+						"{{animal01_id}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "204 - Removing from an animal from an adopter",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test('204 status code', function() {",
+							"    // check for status code",
+							"    pm.response.to.have.status(204);",
+							"})"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{jwt1}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "DELETE",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"name\": \"Luna Sailormoon\",\n    \"email\": \"lunanight@sailorscouts.com\",\n    \"phone_number\": \"(123) 234-1567\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{app_url}}/adopters/{{adopter01-1_id}}/animals/{{animal01_id}}",
+					"host": [
+						"{{app_url}}"
+					],
+					"path": [
+						"adopters",
+						"{{adopter01-1_id}}",
+						"animals",
+						"{{animal01_id}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "405 - Only GET and POST allowed for root url",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test('405 status code', function() {",
+							"    // check for status code",
+							"    pm.response.to.have.status(405);",
+							"})"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{jwt1}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"name\": \"Oreo\",\n    \"species\": \"cat\",\n    \"breed\": \"domestic shorthair\",\n    \"age\": 4,\n    \"gender\": \"male\",\n    \"colors\": [\"white\", \"black\"],\n    \"adoptable\": true,\n    \"microchipped\": false\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{app_url}}/animals/",
+					"host": [
+						"{{app_url}}"
+					],
+					"path": [
+						"animals",
+						""
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "405 - Only GET and POST allowed for root  shelters url",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test('405 status code', function() {",
+							"    // check for status code",
+							"    pm.response.to.have.status(405);",
+							"})"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{jwt1}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"name\": \"Oreo\",\n    \"species\": \"cat\",\n    \"breed\": \"domestic shorthair\",\n    \"age\": 4,\n    \"gender\": \"male\",\n    \"colors\": [\"white\", \"black\"],\n    \"adoptable\": true,\n    \"microchipped\": false\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{app_url}}/shelters/",
+					"host": [
+						"{{app_url}}"
+					],
+					"path": [
+						"shelters",
+						""
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "405 - Only GET and POST allowed for root  shelters url Copy",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test('405 status code', function() {",
+							"    // check for status code",
+							"    pm.response.to.have.status(405);",
+							"})"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{jwt1}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"name\": \"Oreo\",\n    \"species\": \"cat\",\n    \"breed\": \"domestic shorthair\",\n    \"age\": 4,\n    \"gender\": \"male\",\n    \"colors\": [\"white\", \"black\"],\n    \"adoptable\": true,\n    \"microchipped\": false\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{app_url}}/adopters/",
+					"host": [
+						"{{app_url}}"
+					],
+					"path": [
+						"adopters",
+						""
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "405 - Only GET and POST allowed for root  shelters url Copy 2",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test('405 status code', function() {",
+							"    // check for status code",
+							"    pm.response.to.have.status(405);",
+							"})"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{jwt1}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"name\": \"Oreo\",\n    \"species\": \"cat\",\n    \"breed\": \"domestic shorthair\",\n    \"age\": 4,\n    \"gender\": \"male\",\n    \"colors\": [\"white\", \"black\"],\n    \"adoptable\": true,\n    \"microchipped\": false\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{app_url}}/adopters/",
+					"host": [
+						"{{app_url}}"
+					],
+					"path": [
+						"adopters",
+						""
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "406 - trying to view animals in application/xml",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test('406 status code', function() {",
+							"    // check for status code",
+							"    pm.response.to.have.status(406);",
+							"})"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true,
+				"disabledSystemHeaders": {
+					"accept": true,
+					"content-type": true,
+					"content-length": true
+				}
+			},
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "GET",
+				"header": [
+					{
+						"key": "Accept",
+						"value": "application/xml",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"name\": \"Oreo\",\n    \"species\": \"cat\",\n    \"breed\": \"domestic shorthair\",\n    \"age\": 4,\n    \"gender\": \"male\",\n    \"colors\": [\"white\", \"black\"],\n    \"adoptable\": true,\n    \"microchipped\": false\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{app_url}}/animals",
+					"host": [
+						"{{app_url}}"
+					],
+					"path": [
+						"animals"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "406 - Trying to view shelters in application/xml",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test('406 status code', function() {",
+							"    // check for status code",
+							"    pm.response.to.have.status(406);",
+							"})"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true,
+				"disabledSystemHeaders": {
+					"accept": true,
+					"content-type": true,
+					"content-length": true
+				}
+			},
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{jwt1}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [
+					{
+						"key": "Accept",
+						"value": "application/xml",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"name\": \"Oreo\",\n    \"species\": \"cat\",\n    \"breed\": \"domestic shorthair\",\n    \"age\": 4,\n    \"gender\": \"male\",\n    \"colors\": [\"white\", \"black\"],\n    \"adoptable\": true,\n    \"microchipped\": false\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{app_url}}/shelters/",
+					"host": [
+						"{{app_url}}"
+					],
+					"path": [
+						"shelters",
+						""
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "406 - Trying to view adopters in application/xml",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test('406 status code', function() {",
+							"    // check for status code",
+							"    pm.response.to.have.status(406);",
+							"})"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true,
+				"disabledSystemHeaders": {
+					"accept": true,
+					"content-type": true,
+					"content-length": true
+				}
+			},
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{jwt1}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [
+					{
+						"key": "Accept",
+						"value": "application/xml",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"name\": \"Oreo\",\n    \"species\": \"cat\",\n    \"breed\": \"domestic shorthair\",\n    \"age\": 4,\n    \"gender\": \"male\",\n    \"colors\": [\"white\", \"black\"],\n    \"adoptable\": true,\n    \"microchipped\": false\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{app_url}}/adopters/",
+					"host": [
+						"{{app_url}}"
+					],
+					"path": [
+						"adopters",
+						""
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "204 - Delete shelter01-1",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test('204 status code', function() {",
+							"    // check for 204 status code",
+							"    pm.response.to.have.status(204);",
+							"})"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{jwt1}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "DELETE",
+				"header": [],
+				"url": {
+					"raw": "{{app_url}}/shelters/{{shelter01-1_id}}",
+					"host": [
+						"{{app_url}}"
+					],
+					"path": [
+						"shelters",
+						"{{shelter01-1_id}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Delete shelter01-2",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test('204 status code', function() {",
+							"    // check for 204 status code",
+							"    pm.response.to.have.status(204);",
+							"})"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{jwt1}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "DELETE",
+				"header": [],
+				"url": {
+					"raw": "{{app_url}}/shelters/{{shelter01-2_id}}",
+					"host": [
+						"{{app_url}}"
+					],
+					"path": [
+						"shelters",
+						"{{shelter01-2_id}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Delete shelter01-3",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test('204 status code', function() {",
+							"    // check for 204 status code",
+							"    pm.response.to.have.status(204);",
+							"})"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{jwt1}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "DELETE",
+				"header": [],
+				"url": {
+					"raw": "{{app_url}}/shelters/{{shelter01-3_id}}",
+					"host": [
+						"{{app_url}}"
+					],
+					"path": [
+						"shelters",
+						"{{shelter01-3_id}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Delete shelter01-4",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test('204 status code', function() {",
+							"    // check for 204 status code",
+							"    pm.response.to.have.status(204);",
+							"})"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{jwt1}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "DELETE",
+				"header": [],
+				"url": {
+					"raw": "{{app_url}}/shelters/{{shelter01-4_id}}",
+					"host": [
+						"{{app_url}}"
+					],
+					"path": [
+						"shelters",
+						"{{shelter01-4_id}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Delete shelter01-5",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test('204 status code', function() {",
+							"    // check for 204 status code",
+							"    pm.response.to.have.status(204);",
+							"})"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{jwt1}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "DELETE",
+				"header": [],
+				"url": {
+					"raw": "{{app_url}}/shelters/{{shelter01-5_id}}",
+					"host": [
+						"{{app_url}}"
+					],
+					"path": [
+						"shelters",
+						"{{shelter01-5_id}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Delete shelter01-6",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test('204 status code', function() {",
+							"    // check for 204 status code",
+							"    pm.response.to.have.status(204);",
+							"})"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{jwt1}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "DELETE",
+				"header": [],
+				"url": {
+					"raw": "{{app_url}}/shelters/{{shelter01-6_id}}",
+					"host": [
+						"{{app_url}}"
+					],
+					"path": [
+						"shelters",
+						"{{shelter01-6_id}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "204 - Delete animal01",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test('204 status code', function() {",
+							"    // check for 204 status code",
+							"    pm.response.to.have.status(204);",
+							"})"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{jwt1}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "DELETE",
+				"header": [],
+				"url": {
+					"raw": "{{app_url}}/animals/{{animal01_id}}",
+					"host": [
+						"{{app_url}}"
+					],
+					"path": [
+						"animals",
+						"{{animal01_id}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Delete animal02",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test('204 status code', function() {",
+							"    // check for 204 status code",
+							"    pm.response.to.have.status(204);",
+							"})"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{jwt1}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "DELETE",
+				"header": [],
+				"url": {
+					"raw": "{{app_url}}/animals/{{animal02_id}}",
+					"host": [
+						"{{app_url}}"
+					],
+					"path": [
+						"animals",
+						"{{animal02_id}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Delete animal03",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test('204 status code', function() {",
+							"    // check for 204 status code",
+							"    pm.response.to.have.status(204);",
+							"})"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{jwt1}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "DELETE",
+				"header": [],
+				"url": {
+					"raw": "{{app_url}}/animals/{{animal03_id}}",
+					"host": [
+						"{{app_url}}"
+					],
+					"path": [
+						"animals",
+						"{{animal03_id}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Delete animal04",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test('204 status code', function() {",
+							"    // check for 204 status code",
+							"    pm.response.to.have.status(204);",
+							"})"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{jwt1}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "DELETE",
+				"header": [],
+				"url": {
+					"raw": "{{app_url}}/animals/{{animal04_id}}",
+					"host": [
+						"{{app_url}}"
+					],
+					"path": [
+						"animals",
+						"{{animal04_id}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Delete animal05",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test('204 status code', function() {",
+							"    // check for 204 status code",
+							"    pm.response.to.have.status(204);",
+							"})"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{jwt1}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "DELETE",
+				"header": [],
+				"url": {
+					"raw": "{{app_url}}/animals/{{animal05_id}}",
+					"host": [
+						"{{app_url}}"
+					],
+					"path": [
+						"animals",
+						"{{animal05_id}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Delete animal06",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test('204 status code', function() {",
+							"    // check for 204 status code",
+							"    pm.response.to.have.status(204);",
+							"})"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{jwt1}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "DELETE",
+				"header": [],
+				"url": {
+					"raw": "{{app_url}}/animals/{{animal06_id}}",
+					"host": [
+						"{{app_url}}"
+					],
+					"path": [
+						"animals",
+						"{{animal06_id}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Delete shelter02-1",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test('204 status code', function() {",
+							"    // check for 204 status code",
+							"    pm.response.to.have.status(204);",
+							"})"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{jwt2}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "DELETE",
+				"header": [],
+				"url": {
+					"raw": "{{app_url}}/shelters/{{shelter02-1_id}}",
+					"host": [
+						"{{app_url}}"
+					],
+					"path": [
+						"shelters",
+						"{{shelter02-1_id}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Delete adopter01-1",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test('204 status code', function() {",
+							"    // check for 204 status code",
+							"    pm.response.to.have.status(204);",
+							"})"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{jwt1}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "DELETE",
+				"header": [],
+				"url": {
+					"raw": "{{app_url}}/adopters/{{adopter01-1_id}}",
+					"host": [
+						"{{app_url}}"
+					],
+					"path": [
+						"adopters",
+						"{{adopter01-1_id}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Delete adopter01-2",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test('204 status code', function() {",
+							"    // check for 204 status code",
+							"    pm.response.to.have.status(204);",
+							"})"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{jwt1}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "DELETE",
+				"header": [],
+				"url": {
+					"raw": "{{app_url}}/adopters/{{adopter01-2_id}}",
+					"host": [
+						"{{app_url}}"
+					],
+					"path": [
+						"adopters",
+						"{{adopter01-2_id}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Delete adopter02-1",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test('204 status code', function() {",
+							"    // check for 204 status code",
+							"    pm.response.to.have.status(204);",
+							"})"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{jwt2}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "DELETE",
+				"header": [],
+				"url": {
+					"raw": "{{app_url}}/adopters/{{adopter02-1_id}}",
+					"host": [
+						"{{app_url}}"
+					],
+					"path": [
+						"adopters",
+						"{{adopter02-1_id}}"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}

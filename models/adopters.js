@@ -28,10 +28,10 @@ async function addAdopter(req, user)
 }
 
 // Get all adopters (GET)
-async function getAllAdopters(req)
+async function getAllAdopters(req, user)
 {
     // Limit to 5 results per page
-    var query = datastore.createQuery(ADOPTER).limit(5);
+    var query = datastore.createQuery(ADOPTER).filter('user', '=', user).limit(5);
     const results = {}; 
     var prev; 
     if (Object.keys(req.query).includes("cursor")) {
@@ -103,7 +103,9 @@ async function addAnimalToAdopter(animalToAdd, adopter)
         ADOPTER,
         parseInt(adopter.id, 10)
     ]); 
+    console.log(animalToAdd);
     adopter.pets.push(animalToAdd);
+    console.log(adopter.pets);
     const newAdopter = {
         name: adopter.name,
         email: adopter.email,

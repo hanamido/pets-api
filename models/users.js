@@ -15,7 +15,9 @@ async function addUser(user_id, email)
     const userKey = datastore.key(USER); 
     const newUser = {
         "user_id": user_id,
-        "email": email
+        "email": email,
+        "shelters": [],
+        "adopters": []
     };
     return datastore.save({
         "key": userKey,
@@ -67,7 +69,82 @@ async function checkIfUserInDatastore(user_id)
     })
 }
 
+// Function to add a shelter to the user
+async function addShelterToUser(shelter, user_id, req) 
+{
+    // First add the self-link to the shelter
+    const shelterWithSelf = addSelfLink(shelter.id, shelter, req, "shelters");
+    const shelterToAdd = {
+        "id": shelterWithSelf.id,
+        "name": shelterWithSelf.name,
+        "address": shelterWithSelf.address,
+        "self": shelterWithSelf.self
+    }
+    // first get the user
+    const query = datastore.createQuery(USER).filter("user_id", "=", user_id);
+    return datastore.runQuery(query).then(entities => {
+        const user = entities[0].map(fromDatastore);
+        console.log(user);
+        // map the user to its id
+        const userKey = datastore.key([
+            USER,
+            parseInt(user[0].id, 10)
+        ]); 
+        user[0].shelters.push(shelterToAdd);
+        const newUser = {
+            "user_id": user[0].user_id,
+            "email": user[0].email,
+            "shelters": user[0].shelters,
+            "adopters": user[0].adopters
+        }
+        return datastore.save({
+            key: userKey,
+            data: newUser
+        })
+        .then( () => {
+            return userKey;
+        })
+    })
+}
+
 // Function to add an adopter to the user
+async function addAdopterToUser(adopter, user_id, req) 
+{
+    // First add the self-link to the shelter
+    const adopterWithSelf = addSelfLink(adopter.id, adopter, req, "adopters");
+    const adopterToAdd = {
+        "id": adopterWithSelf.id,
+        "name": adopterWithSelf.name,
+        "self": adopterWithSelf.self
+    }
+    // first get the user
+    const query = datastore.createQuery(USER).filter("user_id", "=", user_id);
+    return datastore.runQuery(query).then(entities => {
+        const user = entities[0].map(fromDatastore);
+        console.log(user);
+        // map the user to its id
+        const userKey = datastore.key([
+            USER,
+            parseInt(user[0].id, 10)
+        ]); 
+        user[0].adopters.push(adopterToAdd);
+        const newUser = {
+            "user_id": user[0].user_id,
+            "email": user[0].email,
+            "shelters": user[0].shelters,
+            "adopters": user[0].adopters
+        }
+        return datastore.save({
+            key: userKey,
+            data: newUser
+        })
+        .then( () => {
+            return userKey;
+        })
+    })
+}
+
+// Function to remove the shelter or adopter from the user
 
 /* ------------- End Users Model Functions ------------- */
 
@@ -75,5 +152,7 @@ module.exports = {
     addUser: addUser,
     getUserById: getUserById,
     getAllUsers: getAllUsers,
-    checkIfUserInDatastore: checkIfUserInDatastore
+    checkIfUserInDatastore: checkIfUserInDatastore,
+    addShelterToUser: addShelterToUser,
+    addAdopterToUser: addAdopterToUser
 }

@@ -108,26 +108,16 @@ async function editAnimal(id, name, species, breed, age, gender, colors, adoptab
 }
 
 // Associate a shelter with an animal (PUT)
-async function assignShelterToAnimal(shelter, animal)
+async function assignShelterToAnimal(shelter, animal, req)
 {
     // get the animal key from the datastore
     const animalKey = datastore.key([
         ANIMAL,
         parseInt(animal.id, 10)
     ]); 
-    // shelter to be added to the animal entity
-    let shelterToAdd = {
-        "id": shelter.id,
-        "name": shelter.name,
-        "type": "shelter"  // property to determine where the animal is located
-    };
+    const shelterToAdd = addSelfLink(shelter.id, shelter, req, "shelters");
     // animal to be added to the shelter entity
-    let animalToAdd = {
-        "id": animal.id,
-        "name": animal.name,
-        "species": animal.species,
-        "adoptable": animal.adoptable
-    }
+    let animalToAdd = addSelfLink(animal.id, animal, req, "animals");
     // updated animal with the shelter added
     const updatedAnimal = {
         "name": animal.name,
@@ -153,25 +143,17 @@ async function assignShelterToAnimal(shelter, animal)
 }
 
 // Associate an adopter with an animal (PUT)
-async function assignAdopterToAnimal(adopter, animal)
+async function assignAdopterToAnimal(adopter, animal, req)
 {
     // get the animal key from the datastore
     const animalKey = datastore.key([
         ANIMAL,
         parseInt(animal.id, 10)
-    ]); 
+    ]);
     // adopter to be added to the animal entity
-    let adopterToAdd = {
-        "id": adopter.id,
-        "name": adopter.name,
-        "type": "adopter"
-    };
+    const adopterToAdd = addSelfLink(adopter.id, adopter, req, "adopters");
     // animal to be added to the adopter entity
-    let animalToAdd = {
-        "id": animal.id,
-        "name": animal.name,
-        "species": animal.species
-    }
+    const animalToAdd = addSelfLink(animal.id, animal, req, "animals");
     // updated animal with the adopter added
     const updatedAnimal = {
         "name": animal.name,

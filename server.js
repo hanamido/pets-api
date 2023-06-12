@@ -28,8 +28,8 @@ const domain = process.env.DOMAIN;
 const config = {
     authRequired: false,
     auth0Logout: true,
-    // baseURL: 'https://project7-api-auth.wm.r.appspot.com',
-    baseURL: 'http://localhost:8080',
+    baseURL: 'https://pets-shelter-api.wm.r.appspot.com/',
+    // baseURL: 'http://localhost:8080',
     clientID: client_id,
     issuerBaseURL: domain,
     secret: client_secret,
